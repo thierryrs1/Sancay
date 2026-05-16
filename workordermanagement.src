@@ -1,0 +1,4 @@
+﻿function GetBatchNumber 
+	setvar=e_DistNumber=<e_DocEntry>/<e_LineNumber>
+	return true
+end function

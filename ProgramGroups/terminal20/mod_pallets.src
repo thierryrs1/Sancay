@@ -1,0 +1,51 @@
+﻿[programid]terminal20[/programid][window]mod_pallets[/window][beas_webwindow##1]0000000068000001sprogramid	swindowname	sdesciption	smenuetext	sdescription_en	smenutext_en	sbitmapsmall	sbitmapbig	sbitmapbig2	smenueid	sbasemenuid	smodule	sappid	iversionid	ibeasversion	sgroupid	isortid	ilevelid	icolorid	istatusid	sright_id	ssourcecode	sajaxcode	supdatecode	ssqltable	sdocumentationurl	spc_script	ipc_activ	sbenzingkey	sbenzingrecordtype	sbenzingscript	sbenzingtranslate	sbenzingprogram	svisiblescript	smenutextscript	iweb_activ	sreportstd	sreporthlp	ireportactiv	screatefrom	screatecompany	ssetuptext1	ssetuptext2	ssetuptext3	ssetuptext4	ssetuptext5	ssetuptext6	ssetuptext7	ssetuptext8	ssetuptyp1	ssetuptyp2	ssetuptyp3	ssetuptyp4	ssetuptyp5	ssetuptyp6	ssetuptyp7	ssetuptyp8	ssetupscript	ssetupupdatescript	stranslate	ido_not_update	sdbini	ssourcefilename	idefaultapp	derftstamp	serfuser	dandtstamp	sanduser	01terminal20	02mod_pallets	03Apontamento de Pallets	04Apontamento de Pallets	05Apontamento de Pallets	06Apontamento de Pallets	07	08app_t20_extGRPO.png	09app_t20_extGRPO.png	10mod_pallets	11	13mod_pallets	141	150	16	170	180	190	200	21	22if <get> = 'getAux' then
+<tAb>shtml.web.responseType=json
+<tAb>getAux()
+<tAb>return success
+end if
+
+function getAux
+<tAb>setvar=ls_sql= sp_sps_beas_modpallets_getaux('<acao>','<dados>')
+<tAb>shtml.web.dgrid=sql,<dg_page>,<dg_limit>,call <ls_sql>
+end function
+
+if <get> = 'postAux' then
+<tAb>shtml.web.responseType=json
+<tAb>postAux()
+<tAb>return success
+end if
+
+function postAux
+<tAb>sql=call sp_sps_beas_modpallets_getaux('<acao>','<dados>')   
+<tAb>shtml.web.dgrid=sql,<dg_page>,<dg_limit>,select '<wert1>' from dummy
+end function
+
+if <get> = 'project' then
+<tAb>shtml.web.responseType=json
+<tAb>project()
+<tAb>return success
+end if
+
+function project
+<tAb>sql=select '<system.project>' from beas_dummy
+<tAb>shtml.web.dgrid=sql,<dg_page>,<dg_limit>,select '<wert1>' from dummy
+end function
+
+
+// JDG :: 20190213
+
+_header()
+gui()
+_footer() 
+return success
+
+// -----------------------------------------------------------------------------------------
+function gui
+[html]
+<tAb><script src="assets21/js/class_extendedSearch.js"></script>
+<tAb><script src="/@system.project@/apps/mod_pallets/i18n/@currentlanguage@.js"></script>
+<tAb><script type="module" src="/@system.project@/apps/sps-library/sps_24062025.js"></script>
+<tAb><script type="module" src="/@system.project@/apps/mod_pallets/app.js"></script>
+[/html]
+end function
+	23	24	25	26	27	280	31	34	35	361	37	38	390	40Support, 2026/05/13	41beas GmbH	42	43	44	45	58	59	60	610	62	63\\192.168.30.8\sancay_anexos\beas_project\project\SANCAY_HOM_BR\ProgramGroups\terminal20\mod_pallets.src	652026/05/13 11:40:55	66Support	672026/05/13 11:46:04	68Support	NL	[/beas_webwindow##1][beas_webobjects##2]0000000013000000[/beas_webobjects##2]

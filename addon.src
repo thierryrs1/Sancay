@@ -1,0 +1,12 @@
+// Start and Install-Script for AddOn
+// customer-project
+// created at 2026/05/13 by Support
+// Function first-installation
+function install
+end function
+
+
+// Function start addon (every start from beas)
+function start
+end function
+
