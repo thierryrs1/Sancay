@@ -1,0 +1,19 @@
+# Credenciais e Segredos
+.env
+*.env
+
+# Logs e arquivos temporários
+logs
+*.log
+npm-debug.log*
+
+# Pastas de sistema e editores
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Pastas de dependências (caso venha a usar npm)
+node_modules/
+dist/
+build/
