@@ -34,3 +34,26 @@ export function getData(call = 'getAux', acao = 'getOrdens', dados = '', callbac
         if (callback) callback(new Error('ux.aget not found'), null);
     }
 }
+
+/**
+ * Service Layer Beas function using ux.saveAll
+ */
+export function serviceLayerPost(endpoint, payload, callback) {
+    if (window.ux && typeof window.ux.saveAll === 'function') {
+        window.ux.saveAll(endpoint, payload, function (err, result) {
+            // ux.aError helps identify if the result contains a Beas/SAP error
+            if (window.ux && window.ux.aError && window.ux.aError(result)) {
+                if (callback) callback(new Error('Erro na Service Layer'), result);
+            } else {
+                if (callback) callback(err, result);
+            }
+        }, {
+            method: 'POST',
+            contentType: 'json',
+            timeout: 180000
+        });
+    } else {
+        console.warn('ux.saveAll not found');
+        if (callback) callback(new Error('ux.saveAll not found'), null);
+    }
+}

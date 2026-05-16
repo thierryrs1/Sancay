@@ -1,6 +1,6 @@
 import { OP_MAPPING } from './constants.js';
 import { getPortalTemplate } from './template.js';
-import { getData } from './api.js';
+import { getData, serviceLayerPost } from './api.js';
 
 const BASE_URL = new URL('.', import.meta.url).href;
 
@@ -20,7 +20,7 @@ export class SancayPortal {
         window.app = window.app || {};
         window.app.appData = window.app.appData || {};
         window.app.appData.selectedOrder = [];
-        
+
         console.log('Sancay Portal Modernized Initialized');
 
         // SAP Credentials from .env
@@ -498,7 +498,7 @@ export class SancayPortal {
 
         try {
             document.getElementById('bs-loading').classList.remove('is-hidden');
-            
+
             // Sincronizar com o SAP via Nova API (updatePallet)
             const boxNum = this.currentPallet.boxes.length;
             const updatePayload = {
@@ -512,9 +512,9 @@ export class SancayPortal {
                         "U_SPS_OPCode": this.currentPallet.op,
                         "U_SPS_ItemCode": this.currentPallet.itemCode || "",
                         "U_SPS_DistNumber": this.currentPallet.op,
-                        "U_SPS_BoxCode": `CX-${boxNum}`,
+                        "U_SPS_BoxCode": `CX-${Date.now()}`,
                         "U_SPS_BoxWeight": weight,
-                        "U_SPS_BoxQRCode": `CX-${boxNum}`,
+                        "U_SPS_BoxQRCode": `CX-${Date.now()}`,
                         "U_SPS_Status": "EMPESAGEM",
                         "U_SPS_CreateDate": new Date().toISOString().split('T')[0],
                         "U_SPS_CreateUser": "manager",
@@ -590,30 +590,95 @@ export class SancayPortal {
         });
     }
 
+    async apontarProducao() {
+        return new Promise((resolve) => {
+            const dados = this.currentPallet.id; // Envia o PalletCode
+
+            console.log('Buscando JSON de apontamento para o PalletCode:', dados);
+
+            getData('postAux', 'apontaPesados', dados, (err, payload) => {
+                if (err || !payload) {
+                    console.error('Erro ao buscar JSON de apontamento:', err);
+                    this.showToast(this._t('Erro ao gerar apontamento.'));
+                    return resolve(false);
+                }
+
+                console.log('Payload bruto recebido:');
+                console.log(JSON.stringify(payload, null, 2));
+
+                let receiptPayload;
+                try {
+                    // O Beas retorna o JSON em formato de string dentro de value[0][0]
+                    receiptPayload = JSON.parse(payload.value[0][0]);
+                } catch (parseErr) {
+                    console.error('Erro ao extrair o JSON do Receipt:', parseErr);
+                    this.showToast(this._t('Erro na estrutura do apontamento.'));
+                    return resolve(false);
+                }
+
+                console.log('Enviando para Service Layer:', receiptPayload);
+
+                // Enviar para a Service Layer do Beas
+                serviceLayerPost('/odata4/v1/Receipt', receiptPayload, (sErr, result) => {
+                    if (sErr) {
+                        console.error('Erro no apontamento Service Layer:', sErr, result);
+                        this.showToast(this._t('Erro no apontamento da Service Layer.'));
+                        resolve(false);
+                    } else {
+                        console.log('Apontamento realizado com sucesso:', result);
+                        this.showToast(this._t('Produção apontada com sucesso!'));
+                        resolve(true);
+                    }
+                });
+            });
+        });
+    }
+
     pauseProduction() {
         if (!this.currentPallet) return;
 
-        this.showConfirm(this._t('Tem certeza que deseja pausar a pesagem?'), () => {
+        this.showConfirm(this._t('Tem certeza que deseja pausar e apontar a produção?'), async () => {
             document.getElementById('bs-loading').classList.remove('is-hidden');
-            
+
             const palletCode = this.currentPallet.id;
 
-            getData('postAux', 'postPesado', palletCode, (err, res) => {
-                document.getElementById('bs-loading').classList.add('is-hidden');
+            try {
+                // ETAPA 1: Mudar de EMPESAGEM para PESADO
+                await new Promise((resolve, reject) => {
+                    getData('postAux', 'postPesado', palletCode, (err, res) => {
+                        if (err) reject(new Error('Erro ao marcar como PESADO: ' + err.message));
+                        else resolve(res);
+                    });
+                });
+                console.log('Etapa 1: Caixas marcadas como PESADO.');
 
-                if (err) {
-                    console.error('Erro ao pausar no Beas:', err);
-                    this.showToast(this._t('Erro ao pausar: ') + err.message);
-                    return;
-                }
+                // ETAPA 2: Gerar o Receipt na Service Layer
+                const apontamentoOk = await this.apontarProducao();
+                if (!apontamentoOk) throw new Error('Falha ao gerar Receipt na Service Layer.');
+                console.log('Etapa 2: Receipt gerado na Service Layer.');
 
-                this.showToast(this._t('Produção pausada com sucesso!'));
+                // ETAPA 3: Mudar de PESADO para APONTADO
+                await new Promise((resolve, reject) => {
+                    getData('postAux', 'postApontado', palletCode, (err, res) => {
+                        if (err) reject(new Error('Erro ao marcar como APONTADO: ' + err.message));
+                        else resolve(res);
+                    });
+                });
+                console.log('Etapa 3: Caixas marcadas como APONTADO.');
+
+                this.showToast(this._t('Produção pausada e apontada com sucesso!'));
 
                 // Lógica local de pausa
                 this.saveData();
                 this.currentPallet = null;
                 this.switchView('dashboard');
-            });
+
+            } catch (err) {
+                console.error('Falha no fluxo de pausa/apontamento:', err);
+                this.showToast(err.message);
+            } finally {
+                document.getElementById('bs-loading').classList.add('is-hidden');
+            }
         });
     }
 
