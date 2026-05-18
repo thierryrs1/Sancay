@@ -192,9 +192,21 @@ export function updateProcessView() {
     }
 
     const boxList = document.getElementById('current-boxes-list');
-    boxList.innerHTML = this.currentPallet.boxes.slice(-5).reverse().map((box, index) => {
+    boxList.innerHTML = [...this.currentPallet.boxes].reverse().map((box, index) => {
         const actualIndex = this.currentPallet.boxes.length - 1 - index;
-        return `<li><span>${this._t('Caixa')} #${actualIndex + 1}</span><div style="display: flex; align-items: center; gap: 1rem;"><span class="box-weight">${box.weight.toFixed(2)} kg</span><button class="delete-box-btn" onclick="deleteBox(${actualIndex})"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button></div></li>`;
+        const boxStatus = box.status || 'EMPESAGEM';
+        return `<li style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 16px !important; background: #ffffff !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; margin-bottom: 8px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;">
+            <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
+                <span style="font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${this._t('Caixa')} #${actualIndex + 1}</span>
+                <span class="badge" style="background: rgba(34, 197, 94, 0.1) !important; color: #22c55e !important; border: 1px solid rgba(34, 197, 94, 0.2) !important; font-size: 0.7rem !important; padding: 2px 8px !important; border-radius: 12px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.03em !important;">${this._t(boxStatus)}</span>
+            </div>
+            <div style="display: flex !important; align-items: center !important; gap: 16px !important;">
+                <span class="box-weight" style="font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${box.weight.toFixed(2)} kg</span>
+                <button class="delete-box-btn" onclick="deleteBox(${actualIndex})" style="background: none !important; border: none !important; color: #ef4444 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'" title="${this._t('Excluir Caixa')}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+            </div>
+        </li>`;
     }).join('');
     document.getElementById('current-total-weight').textContent = `${this.currentPallet.totalWeight.toFixed(2)} kg`;
 }
