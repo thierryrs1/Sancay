@@ -40,7 +40,8 @@ import {
     printCurrentViewedPallet,
     printPallet,
     deleteBox,
-    reopenPallet
+    reopenPallet,
+    fetchClosedPallets
 } from './pallets.js';
 
 const BASE_URL = new URL('.', import.meta.url).href;
@@ -132,6 +133,7 @@ export class SancayPortal {
         this.renderHistory();
         this.updateStats();
         this.fetchPendingPallets();
+        this.fetchClosedPallets();
     }
 
     loadLanguageScript(url) {
@@ -195,5 +197,6 @@ Object.assign(SancayPortal.prototype, {
     printCurrentViewedPallet,
     printPallet,
     deleteBox,
-    reopenPallet
+    reopenPallet,
+    fetchClosedPallets
 });

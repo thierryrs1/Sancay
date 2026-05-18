@@ -377,7 +377,7 @@ export function renderDashboard() {
 }
 
 export function renderHistory() {
-    let closed = this.pallets.filter(p => p.status === 'Finalizado');
+    let closed = this.sapClosedPallets || this.pallets.filter(p => p.status === 'Finalizado');
 
     // Aplicar filtros de pesquisa se houver filtros ativos
     const activeFilters = hasActiveFilters(this.filters);
@@ -423,7 +423,7 @@ export function renderHistory() {
 
 export function openPalletDetails(id) {
     this.viewedPalletId = id;
-    const p = this.pallets.find(p => p.id === id);
+    const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === id)) || this.pallets.find(p => p.id === id);
     if (!p) return;
     document.getElementById('modal-op').textContent = p.op;
     document.getElementById('modal-material').textContent = p.material;
@@ -442,7 +442,11 @@ export function openPalletDetails(id) {
     document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
     document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
-    document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${new Date(b.timestamp).toLocaleTimeString()}</td><td class="sancay-td"><strong class="sancay-value">${b.weight.toFixed(2)} kg</strong></td></tr>`).join('');
+    document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => {
+        const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : '---';
+        const weightStr = typeof b.weight === 'number' ? `${b.weight.toFixed(2)} kg` : '---';
+        return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td"><strong class="sancay-value">${weightStr}</strong></td></tr>`;
+    }).join('');
     this.el.palletModal.classList.add('is-active');
 }
 
