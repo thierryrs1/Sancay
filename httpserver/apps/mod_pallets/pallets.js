@@ -98,7 +98,7 @@ export async function startNewPallet() {
             this.showToast(this._t('Pallet gerado com sucesso!'));
 
             const newPallet = {
-                id: (this.pallets.length > 0 ? Math.max(...this.pallets.map(p => parseInt(p.id))) + 1 : 1).toString(),
+                id: palletPayload.U_SPS_PalletCode,
                 docEntry: res.DocEntry || res.AbsoluteEntry,
                 op: `${op[0]}/${op[1]}`,
                 itemCode: op[2],
@@ -221,10 +221,51 @@ export async function registerBox() {
 }
 
 export function closePallet() {
-    this.showConfirm(`${this._t('Encerrar Pallet')} #${this.currentPallet.id}?`, async () => {
-        try {
-            document.getElementById('bs-loading').classList.remove('is-hidden');
+    if (!this.currentPallet) return;
 
+    this.showConfirm(`${this._t('Encerrar Pallet')} #${this.currentPallet.id}?`, async () => {
+        // Pré-construir e exibir o JSON que será enviado para a API no Patch/Post (útil para Postman)
+        const patchTestPayload = {
+            "DocEntry": this.currentPallet.docEntry,
+            "U_SPS_Tipo": "PALLET",
+            "U_SPS_OPCode": this.currentPallet.op,
+            "U_SPS_PalletCode": this.currentPallet.id,
+            "U_SPS_Status": "FINALIZADO",
+            "U_SPS_UpdateUser": "manager",
+            "U_SPS_Printed": "N",
+            "SPS_PALLET_GROUP_LCollection": []
+        };
+        console.log('JSON pré-configurado de fechamento (FINALIZADO) para testar no Postman:', JSON.stringify(patchTestPayload, null, 2));
+
+        document.getElementById('bs-loading').classList.remove('is-hidden');
+
+        const palletCode = this.currentPallet.id;
+
+        try {
+            // ETAPA 1: Mudar de EMPESAGEM para PESADO
+            await new Promise((resolve, reject) => {
+                getData('postAux', 'postPesado', palletCode, (err, res) => {
+                    if (err) reject(new Error('Erro ao marcar como PESADO: ' + err.message));
+                    else resolve(res);
+                });
+            });
+            console.log('Etapa 1 (Encerrar): Caixas marcadas como PESADO.');
+
+            // ETAPA 2: Gerar o Receipt na Service Layer
+            const apontamentoOk = await this.apontarProducao();
+            if (!apontamentoOk) throw new Error('Falha ao gerar Receipt na Service Layer.');
+            console.log('Etapa 2 (Encerrar): Receipt gerado na Service Layer.');
+
+            // ETAPA 3: Mudar de PESADO para APONTADO
+            await new Promise((resolve, reject) => {
+                getData('postAux', 'postApontado', palletCode, (err, res) => {
+                    if (err) reject(new Error('Erro ao marcar como APONTADO: ' + err.message));
+                    else resolve(res);
+                });
+            });
+            console.log('Etapa 3 (Encerrar): Caixas marcadas como APONTADO.');
+
+            // ETAPA 4: Atualizar o cabeçalho do Pallet para FINALIZADO no SAP
             const updatePayload = {
                 "DocEntry": this.currentPallet.docEntry,
                 "U_SPS_Tipo": "PALLET",
@@ -232,10 +273,11 @@ export function closePallet() {
                 "U_SPS_PalletCode": this.currentPallet.id,
                 "U_SPS_Status": "FINALIZADO",
                 "U_SPS_UpdateUser": "manager",
-                "U_SPS_Printed": "N"
+                "U_SPS_Printed": "N",
+                "SPS_PALLET_GROUP_LCollection": []
             };
 
-            console.log('Enviando fechamento para o SAP (JSON):', JSON.stringify(updatePayload, null, 2));
+            console.log('Enviando fechamento (FINALIZADO) para o SAP:', JSON.stringify(updatePayload, null, 2));
 
             const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
                 method: 'POST',
@@ -243,6 +285,11 @@ export function closePallet() {
                 body: JSON.stringify(updatePayload)
             });
 
+            if (!response.ok) {
+                throw new Error('Erro ao atualizar status do pallet para FINALIZADO no SAP.');
+            }
+
+            // Lógica local de finalização
             this.currentPallet.status = 'Finalizado';
             this.currentPallet.endTime = new Date().toISOString();
             this.saveData();
@@ -252,13 +299,15 @@ export function closePallet() {
             this.renderHistory();
             this.updateStats();
 
-            document.getElementById('bs-loading').classList.add('is-hidden');
+            this.showToast(this._t('Pallet encerrado e apontado com sucesso!'));
+
             document.getElementById('success-pallet-id').textContent = this.lastClosedPallet.id;
             this.el.successModal.style.display = 'block';
 
         } catch (err) {
-            console.error('Erro ao encerrar pallet no SAP:', err);
-            this.showToast(this._t('Erro ao encerrar no SAP. Verifique a conexão.'));
+            console.error('Falha no encerramento/apontamento do pallet:', err);
+            this.showToast(err.message);
+        } finally {
             document.getElementById('bs-loading').classList.add('is-hidden');
         }
     });
@@ -277,19 +326,30 @@ export async function apontarProducao() {
                 return resolve(false);
             }
 
-            console.log('Payload bruto recebido:');
+            console.log('Payload bruto recebido de apontaPesados:');
             console.log(JSON.stringify(payload, null, 2));
 
             let receiptPayload;
             try {
-                receiptPayload = JSON.parse(payload.value[0][0]);
+                const rawString = (payload && payload.value && payload.value[0]) ? payload.value[0][0] : null;
+                console.log('Conteúdo extraído para parse (string crua):', rawString);
+                
+                if (!rawString || rawString.trim() === "" || rawString === "{}") {
+                    console.log('Nenhum dado de apontamento pendente no SAP para este pallet. Pulando geração de Receipt.');
+                    this.showToast(this._t('Nenhum apontamento pendente.'));
+                    return resolve(true);
+                }
+                
+                receiptPayload = JSON.parse(rawString);
             } catch (parseErr) {
                 console.error('Erro ao extrair o JSON do Receipt:', parseErr);
+                console.error('Dados completos recebidos:', payload);
                 this.showToast(this._t('Erro na estrutura do apontamento.'));
                 return resolve(false);
             }
 
-            console.log('Enviando para Service Layer:', receiptPayload);
+            console.log('JSON pronto para enviar à Service Layer (/odata4/v1/Receipt):');
+            console.log(JSON.stringify(receiptPayload, null, 2));
 
             serviceLayerPost('/odata4/v1/Receipt', receiptPayload, (sErr, result) => {
                 if (sErr) {
