@@ -41,6 +41,10 @@
     padding: 0 !important;
 }
 
+html {
+    scrollbar-gutter: stable !important;
+}
+
 body {
     font-family: 'Outfit', sans-serif !important;
     background-color: var(--bg-main) !important;
