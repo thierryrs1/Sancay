@@ -96,12 +96,13 @@ export function bindEvents() {
 
     this.el.confirmPrintBtn.addEventListener('click', () => {
         if (this.lastClosedPallet) this.printPallet(this.lastClosedPallet);
-        this.el.successModal.style.display = 'none';
+        this.el.successModal.classList.remove('active');
+        this.el.successModal.classList.remove('is-active');
         this.switchView('dashboard');
     });
 
     this.el.skipPrintBtn.addEventListener('click', () => {
-        this.el.successModal.style.display = 'none';
+        this.el.successModal.classList.remove('active');
         this.el.successModal.classList.remove('is-active');
         this.switchView('dashboard');
     });
@@ -200,16 +201,23 @@ export function renderDashboard() {
 
 export function renderHistory() {
     const closed = this.pallets.filter(p => p.status === 'Finalizado').reverse();
-    this.el.historyList.innerHTML = closed.map(p => `
-        <tr onclick="openPalletDetails('${p.id}')">
-            <td class="sancay-td">#${p.id}</td>
-            <td class="sancay-td">${new Date(p.endTime).toLocaleString()}</td>
-            <td class="sancay-td">${p.op}</td>
-            <td class="sancay-td">${p.boxes.length}</td>
-            <td class="sancay-td">${p.totalWeight.toFixed(2)} kg</td>
-            <td class="sancay-td"><span class="badge" style="background: var(--accent-success)">${this._t('Finalizado')}</span></td>
-        </tr>
-    `).join('') || `<tr><td colspan="6" style="text-align:center" class="sancay-td">${this._t('Sem registros.')}</td></tr>`;
+    this.el.historyList.innerHTML = closed.map(p => {
+        const dateStr = p.endTime ? new Date(p.endTime).toLocaleString() : '---';
+        const opStr = p.op || '---';
+        const boxesCount = p.boxes ? p.boxes.length : 0;
+        const totalWeight = typeof p.totalWeight === 'number' ? p.totalWeight.toFixed(2) : '0.00';
+        
+        return `
+            <tr onclick="openPalletDetails('${p.id}')">
+                <td class="sancay-td">#${p.id}</td>
+                <td class="sancay-td">${dateStr}</td>
+                <td class="sancay-td">${opStr}</td>
+                <td class="sancay-td">${boxesCount}</td>
+                <td class="sancay-td">${totalWeight} kg</td>
+                <td class="sancay-td"><span class="badge" style="background: var(--accent-success)">${this._t('Finalizado')}</span></td>
+            </tr>
+        `;
+    }).join('') || `<tr><td colspan="6" style="text-align:center" class="sancay-td">${this._t('Sem registros.')}</td></tr>`;
 }
 
 export function openPalletDetails(id) {

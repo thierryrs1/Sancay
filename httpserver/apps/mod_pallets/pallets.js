@@ -302,7 +302,7 @@ export function closePallet() {
             this.showToast(this._t('Pallet encerrado e apontado com sucesso!'));
 
             document.getElementById('success-pallet-id').textContent = this.lastClosedPallet.id;
-            this.el.successModal.style.display = 'block';
+            this.el.successModal.classList.add('active');
 
         } catch (err) {
             console.error('Falha no encerramento/apontamento do pallet:', err);
