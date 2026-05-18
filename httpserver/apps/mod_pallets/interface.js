@@ -185,15 +185,87 @@ export function renderDashboard() {
     });
 
     this.el.activePalletsList.innerHTML = sortedActive.map(p => {
-        const timeStr = p.displayTime || (p.startTime ? new Date(p.startTime).toLocaleTimeString() : '---');
+        // Determinar o status com base no peso total
+        const totalWeight = p.totalWeight || 0;
+        const statusLabel = totalWeight === 0 ? this._t('Novo') : this._t('Em andamento');
+        const statusBadgeStyle = totalWeight === 0 
+            ? 'background: rgba(14, 165, 233, 0.15) !important; color: var(--primary) !important; border: 1px solid rgba(14, 165, 233, 0.25) !important;' 
+            : 'background: rgba(245, 158, 11, 0.15) !important; color: var(--warning) !important; border: 1px solid rgba(245, 158, 11, 0.25) !important;';
+
+        // Buscar o código do item associado à OP do pallet (robusto contra espaços)
+        const itemCode = p.itemCode || (this.productionOrders && this.productionOrders.find(o => {
+            const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
+            const opB = p.op.toString().replace(/\s+/g, '');
+            return opA === opB;
+        })?.[2]) || '';
+
+        // Buscar a descrição do item (material) associada à OP do pallet (robusto contra espaços)
+        const material = p.material || (this.productionOrders && this.productionOrders.find(o => {
+            const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
+            const opB = p.op.toString().replace(/\s+/g, '');
+            return opA === opB;
+        })?.[3]) || '';
+
+        // Formatação completa e resiliente de Data e Hora
+        let fullDateTimeStr = '---';
+        try {
+            if (p.startTime) {
+                const dateObj = new Date(p.startTime.toString().replace(' ', 'T'));
+                if (!isNaN(dateObj)) {
+                    fullDateTimeStr = dateObj.toLocaleString();
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao formatar data:', e);
+        }
+
+        const prodDisplay = itemCode 
+            ? `${itemCode} | ${material || 'Sem descrição'}` 
+            : (material || 'Sem descrição');
+
         return `
             <div class="pallet-card" onclick="openActivePallet('${p.id}')">
-                <div class="card-head"><span class="badge">Ativo</span><p>${timeStr}</p></div>
-                <h3>${this._t('Pallet')} #${p.id}</h3><p class="op-text">${p.op}</p>
-                <div class="pallet-stats">
-                    <div><span>Total</span><strong>${(p.totalWeight || 0).toFixed(2)} kg</strong></div>
+                <!-- Top Header: ID e Status -->
+                <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 0.75rem !important; padding: 0 !important;">
+                    <div style="display: flex !important; align-items: center !important; gap: 8px !important; margin: 0 !important; padding: 0 !important;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        <span style="font-size: 1.4rem !important; font-weight: 800 !important; color: var(--text-strong) !important; letter-spacing: -0.01em !important; margin: 0 !important; padding: 0 !important;">Pallet #${p.id}</span>
+                    </div>
+                    <span class="badge" style="${statusBadgeStyle}">${statusLabel}</span>
                 </div>
-                <button class="btn primary" style="width: 100%; margin-top: 10px;">${this._t('Continuar')}</button>
+
+                <!-- Criado em (Data e Hora) -->
+                <div style="font-size: 0.85rem !important; color: var(--text-muted) !important; margin-bottom: 1.5rem !important; display: flex !important; align-items: center !important; gap: 6px !important; padding: 0 !important; margin-top: 0 !important;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted) !important; margin: 0 !important; padding: 0 !important;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span style="margin: 0 !important; padding: 0 !important;">Criado em: <strong style="color: var(--text-normal) !important; font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important;">${fullDateTimeStr}</strong></span>
+                </div>
+
+                <!-- Seção Produto (Código | Descrição) -->
+                <div style="background: #f8fafc !important; border: 1px solid var(--border-color) !important; padding: 1.25rem !important; border-radius: var(--radius-md) !important; margin-bottom: 1.5rem !important; display: block !important; margin-top: 0 !important;">
+                    <p style="font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 8px !important; padding: 0 !important; margin-top: 0 !important; display: block !important; line-height: 1 !important;">Produto</p>
+                    <p style="font-size: 1rem !important; font-weight: 700 !important; color: var(--text-strong) !important; line-height: 1.4 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 !important; padding: 0 !important; display: block !important;" title="${prodDisplay}">
+                        ${prodDisplay}
+                    </p>
+                </div>
+
+                <!-- Info Grid: OP e Peso Lado a Lado -->
+                <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 2rem !important; padding: 0 4px !important; margin-top: 0 !important;">
+                    <div style="margin: 0 !important; padding: 0 !important; display: block !important; text-align: left !important;">
+                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 8px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Ordem de Produção</span>
+                        <span style="font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; font-weight: 700 !important; color: var(--primary) !important; background: rgba(37, 99, 235, 0.06) !important; padding: 6px 12px !important; border-radius: 6px !important; border: 1px solid rgba(37, 99, 235, 0.12) !important; display: inline-block !important; margin: 0 !important;">
+                            OP ${p.op}
+                        </span>
+                    </div>
+                    <div style="text-align: right !important; margin: 0 !important; padding: 0 !important; display: block !important;">
+                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 6px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Total Acumulado</span>
+                        <strong style="font-size: 1.8rem !important; font-weight: 800 !important; color: var(--text-strong) !important; margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1 !important;">${totalWeight.toFixed(2)} <span style="font-size: 1.05rem !important; font-weight: 600 !important; color: var(--text-muted) !important;">kg</span></strong>
+                    </div>
+                </div>
+
+                <button class="btn primary">
+                    <span>${this._t('Continuar')}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
             </div>
         `;
     }).join('') || `<p style="color: var(--text-secondary)">${this._t('Vazio.')}</p>`;

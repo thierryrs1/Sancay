@@ -10,6 +10,7 @@ export function fetchPendingPallets() {
 
         const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
 
+        // Mapear os pallets básicos do SAP
         const mappedPallets = sapPallets.map(p => {
             const startTime = p[4] || p.CreateDate;
             let formattedTime = '---';
@@ -28,17 +29,60 @@ export function fetchPendingPallets() {
                 displayTime: formattedTime,
                 startTime: startTime,
                 boxes: Array(parseInt(p[2] || p.Caixas || 0)).fill({}),
-                totalWeight: parseFloat(p[3] || p.Peso || 0)
+                totalWeight: parseFloat(p[3] || p.Peso || 0),
+                itemCode: ''
             };
         });
 
-        if (!window.app) window.app = {};
-        if (!window.app.appData) window.app.appData = {};
-        window.app.appData.pendingPallets = mappedPallets;
+        // Buscar o itemCode de forma dinâmica para cada pallet
+        const promises = mappedPallets.map(pallet => {
+            return new Promise((resolve) => {
+                // Tenta achar localmente na lista carregada
+                const localOP = _this.productionOrders && _this.productionOrders.find(o => {
+                    const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
+                    const opB = pallet.op.toString().replace(/\s+/g, '');
+                    return opA === opB;
+                });
 
-        _this.sapActivePallets = mappedPallets;
-        _this.renderDashboard();
-        _this.updateStats();
+                if (localOP) {
+                    pallet.itemCode = localOP[2];
+                    pallet.material = localOP[3] || '';
+                    resolve();
+                } else {
+                    // Busca direto no SAP/Beas se não encontrar local
+                    const opParts = pallet.op.split('/');
+                    if (opParts.length === 2) {
+                        const opDados = `@${opParts[0]}@@${opParts[1]}@`;
+                        getData('getAux', 'getItem', opDados, (err, itemData) => {
+                            if (!err && itemData) {
+                                if (itemData.value && itemData.value[0]) {
+                                    pallet.itemCode = itemData.value[0][0] || '';
+                                    pallet.material = itemData.value[0][1] || ''; // a segunda coluna!
+                                } else {
+                                    const item = Array.isArray(itemData) ? itemData[0] : itemData;
+                                    pallet.itemCode = item || '';
+                                    pallet.material = '';
+                                }
+                            }
+                            resolve();
+                        });
+                    } else {
+                        resolve();
+                    }
+                }
+            });
+        });
+
+        // Espera todos os itemCodes serem resolvidos para renderizar a tela
+        Promise.all(promises).then(() => {
+            if (!window.app) window.app = {};
+            if (!window.app.appData) window.app.appData = {};
+            window.app.appData.pendingPallets = mappedPallets;
+
+            _this.sapActivePallets = mappedPallets;
+            _this.renderDashboard();
+            _this.updateStats();
+        });
     });
 }
 
@@ -60,6 +104,7 @@ export function fetchProductionOrders() {
             window.app.appData.getOrdens = orders;
         }
         _this.populateOPDropdown();
+        _this.renderDashboard();
     });
 }
 
@@ -436,8 +481,14 @@ export async function openActivePallet(id) {
                 await new Promise((resolve) => {
                     getData('getAux', 'getItem', opDados, (err, itemData) => {
                         if (!err && itemData) {
-                            const item = (itemData.value && itemData.value[0]) ? itemData.value[0][0] : (Array.isArray(itemData) ? itemData[0] : itemData);
-                            p.itemCode = item;
+                            if (itemData.value && itemData.value[0]) {
+                                p.itemCode = itemData.value[0][0] || '';
+                                p.material = itemData.value[0][1] || ''; // A descrição do item!
+                            } else {
+                                const item = Array.isArray(itemData) ? itemData[0] : itemData;
+                                p.itemCode = item || '';
+                                p.material = '';
+                            }
                         }
                         resolve();
                     });
