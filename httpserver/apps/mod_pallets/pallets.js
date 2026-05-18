@@ -207,6 +207,14 @@ export function updateProcessView() {
             badgeStyle = 'background: rgba(34, 197, 94, 0.1) !important; color: #22c55e !important; border: 1px solid rgba(34, 197, 94, 0.2) !important;';
         }
 
+        const actionHtml = statusValue === 'APONTADO'
+            ? `<div style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--text-muted) !important;" title="${this._t('Caixa já apontada (não pode ser excluída)')}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted) !important;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+               </div>`
+            : `<button class="delete-box-btn" onclick="deleteBox(${actualIndex})" style="background: none !important; border: none !important; color: #ef4444 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'" title="${this._t('Excluir Caixa')}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+               </button>`;
+
         return `<li style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 16px !important; background: #ffffff !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; margin-bottom: 8px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;">
             <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
                 <span style="font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${this._t('Caixa')} #${actualIndex + 1}</span>
@@ -214,9 +222,7 @@ export function updateProcessView() {
             </div>
             <div style="display: flex !important; align-items: center !important; gap: 16px !important;">
                 <span class="box-weight" style="font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${box.weight.toFixed(2)} kg</span>
-                <button class="delete-box-btn" onclick="deleteBox(${actualIndex})" style="background: none !important; border: none !important; color: #ef4444 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'" title="${this._t('Excluir Caixa')}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                </button>
+                ${actionHtml}
             </div>
         </li>`;
     }).join('');
@@ -565,6 +571,13 @@ export function printPallet(p) {
 }
 
 export function deleteBox(idx) {
+    if (!this.currentPallet || !this.currentPallet.boxes[idx]) return;
+    const box = this.currentPallet.boxes[idx];
+    if (box.status && box.status.toUpperCase() === 'APONTADO') {
+        this.showToast(this._t('Caixas já apontadas no SAP não podem ser excluídas!'));
+        return;
+    }
+
     this.showConfirm(`${this._t('Excluir Caixa')} #${idx + 1}?`, () => {
         this.currentPallet.boxes.splice(idx, 1);
         this.currentPallet.totalWeight = this.currentPallet.boxes.reduce((s, b) => s + b.weight, 0);
