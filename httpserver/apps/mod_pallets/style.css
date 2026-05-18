@@ -1177,3 +1177,20 @@ tr:hover td {
         transform: scale(1) !important;
     }
 }
+
+/* Toast Floating Notification (Evita Layout Shifts) */
+.toast {
+    position: fixed !important;
+    bottom: 2rem !important;
+    right: 2rem !important;
+    background: var(--bg-card) !important;
+    color: var(--text-strong) !important;
+    padding: 1rem 2rem !important;
+    border-radius: var(--radius-md) !important;
+    border-left: 4px solid var(--primary) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 10000 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    pointer-events: none !important;
+}
