@@ -36,7 +36,8 @@ export function mapElements() {
         progressBar: document.querySelector('.progress-bar'),
         activePalletsCount: document.getElementById('active-pallets-count'),
         todayBoxesCount: document.getElementById('today-boxes-count'),
-        totalWeightCount: document.getElementById('total-weight-count')
+        totalWeightCount: document.getElementById('total-weight-count'),
+        refreshPalletsBtn: document.getElementById('refresh-pallets-btn')
     };
 }
 
@@ -72,6 +73,22 @@ export function bindEvents() {
     this.el.registerBoxBtn.addEventListener('click', () => this.registerBox());
     this.el.closePalletBtn.addEventListener('click', () => this.closePallet());
     this.el.pauseProductionBtn.addEventListener('click', () => this.pauseProduction());
+
+    if (this.el.refreshPalletsBtn) {
+        this.el.refreshPalletsBtn.addEventListener('click', () => {
+            const svgIcon = this.el.refreshPalletsBtn.querySelector('svg');
+            if (svgIcon) {
+                svgIcon.style.transform = 'rotate(360deg)';
+                svgIcon.style.transition = 'transform 0.6s ease-in-out';
+                setTimeout(() => {
+                    svgIcon.style.transform = 'rotate(0deg)';
+                    svgIcon.style.transition = 'none';
+                }, 600);
+            }
+            this.fetchPendingPallets();
+            this.showToast(this._t('Atualizando pallets...'));
+        });
+    }
 
     this.el.closeModalBtn.addEventListener('click', () => this.el.palletModal.style.display = 'none');
     this.el.editPalletBtn.addEventListener('click', () => this.reopenPallet());

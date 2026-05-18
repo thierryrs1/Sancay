@@ -295,9 +295,8 @@ export function closePallet() {
             this.saveData();
             this.lastClosedPallet = { ...this.currentPallet };
             this.currentPallet = null;
-            this.renderDashboard();
+            this.fetchPendingPallets(); // Atualiza a tela automaticamente trazendo os dados novos do SAP!
             this.renderHistory();
-            this.updateStats();
 
             this.showToast(this._t('Pallet encerrado e apontado com sucesso!'));
 

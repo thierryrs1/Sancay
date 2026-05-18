@@ -60,9 +60,14 @@ export function getPortalTemplate(t) {
                             </div>
                         </div>
                         <div class="dashboard-content">
-                            <div class="section-header">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <h3>${t('Pallets Em Processo')}</h3>
+                            <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <h3>${t('Pallets Em Processo')}</h3>
+                                </div>
+                                <button id="refresh-pallets-btn" class="icon-btn" title="${t('Recarregar Pallets')}" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 5px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                                </button>
                             </div>
                             <div id="active-pallets-list" class="active-pallets-grid"></div>
                         </div>
