@@ -80,7 +80,7 @@ export async function startNewPallet() {
             "U_SPS_PalletCode": `${op[9]}-${op[0]}/${op[1]}`,
             "U_SPS_Status": "ABERTO",
             "U_SPS_QRCode": `${op[9]}-${op[0]}/${op[1]}`,
-            "U_SPS_ExpectedQty": parseFloat(op[4] || 0),
+            "U_SPS_ExpectedQty": parseFloat(op[4] || 0) / parseFloat(op[6] || 1),
             "U_SPS_CreateUser": "manager",
             "U_SPS_Printed": "N"
         };
@@ -103,7 +103,7 @@ export async function startNewPallet() {
                 op: `${op[0]}/${op[1]}`,
                 itemCode: op[2],
                 material: op[3],
-                expectedQty: parseFloat(op[4] || 0),
+                expectedQty: parseFloat(op[4] || 0) / parseFloat(op[6] || 1),
                 startTime: new Date().toISOString(),
                 status: 'Em processo',
                 boxes: [],
