@@ -37,7 +37,20 @@ export function mapElements() {
         activePalletsCount: document.getElementById('active-pallets-count'),
         todayBoxesCount: document.getElementById('today-boxes-count'),
         totalWeightCount: document.getElementById('total-weight-count'),
-        refreshPalletsBtn: document.getElementById('refresh-pallets-btn')
+        refreshPalletsBtn: document.getElementById('refresh-pallets-btn'),
+        openFilterBtn: document.getElementById('open-filter-btn'),
+        filterModal: document.getElementById('filter-modal'),
+        closeFilterModalBtn: document.getElementById('close-filter-modal'),
+        clearFilterBtn: document.getElementById('clear-filter-btn'),
+        applyFilterBtn: document.getElementById('apply-filter-btn'),
+        filterPalletId: document.getElementById('filter-pallet-id'),
+        filterOp: document.getElementById('filter-op'),
+        filterItem: document.getElementById('filter-item'),
+        filterDateStart: document.getElementById('filter-date-start'),
+        filterDateEnd: document.getElementById('filter-date-end'),
+        activeFiltersIndicatorDashboard: document.getElementById('active-filters-indicator-dashboard'),
+        activeFiltersIndicatorHistory: document.getElementById('active-filters-indicator-history'),
+        clearAllFiltersBtns: document.querySelectorAll('.clear-all-filters-btn')
     };
 }
 
@@ -90,7 +103,80 @@ export function bindEvents() {
         });
     }
 
-    this.el.closeModalBtn.addEventListener('click', () => this.el.palletModal.style.display = 'none');
+    this.el.closeModalBtn.addEventListener('click', () => {
+        this.el.palletModal.classList.remove('is-active');
+        this.el.palletModal.classList.remove('active');
+        this.el.palletModal.style.display = 'none';
+    });
+
+    // Filter Modal Event Handlers
+    if (this.el.openFilterBtn) {
+        this.el.openFilterBtn.addEventListener('click', () => {
+            if (this.el.filterPalletId) this.el.filterPalletId.value = this.filters.palletId || '';
+            if (this.el.filterOp) this.el.filterOp.value = this.filters.op || '';
+            if (this.el.filterItem) this.el.filterItem.value = this.filters.item || '';
+            if (this.el.filterDateStart) this.el.filterDateStart.value = this.filters.dateStart || '';
+            if (this.el.filterDateEnd) this.el.filterDateEnd.value = this.filters.dateEnd || '';
+
+            this.el.filterModal.classList.add('is-active');
+            this.el.filterModal.classList.add('active');
+        });
+    }
+
+    if (this.el.closeFilterModalBtn) {
+        this.el.closeFilterModalBtn.addEventListener('click', () => {
+            this.el.filterModal.classList.remove('is-active');
+            this.el.filterModal.classList.remove('active');
+        });
+    }
+
+    if (this.el.clearFilterBtn) {
+        this.el.clearFilterBtn.addEventListener('click', () => {
+            if (this.el.filterPalletId) this.el.filterPalletId.value = '';
+            if (this.el.filterOp) this.el.filterOp.value = '';
+            if (this.el.filterItem) this.el.filterItem.value = '';
+            if (this.el.filterDateStart) this.el.filterDateStart.value = '';
+            if (this.el.filterDateEnd) this.el.filterDateEnd.value = '';
+
+            this.filters = { palletId: '', op: '', item: '', dateStart: '', dateEnd: '' };
+
+            this.renderDashboard();
+            this.renderHistory();
+
+            this.el.filterModal.classList.remove('is-active');
+            this.el.filterModal.classList.remove('active');
+            this.showToast(this._t('Filtros limpos com sucesso.'));
+        });
+    }
+
+    if (this.el.applyFilterBtn) {
+        this.el.applyFilterBtn.addEventListener('click', () => {
+            this.filters.palletId = this.el.filterPalletId ? this.el.filterPalletId.value : '';
+            this.filters.op = this.el.filterOp ? this.el.filterOp.value : '';
+            this.filters.item = this.el.filterItem ? this.el.filterItem.value : '';
+            this.filters.dateStart = this.el.filterDateStart ? this.el.filterDateStart.value : '';
+            this.filters.dateEnd = this.el.filterDateEnd ? this.el.filterDateEnd.value : '';
+
+            this.renderDashboard();
+            this.renderHistory();
+
+            this.el.filterModal.classList.remove('is-active');
+            this.el.filterModal.classList.remove('active');
+            this.showToast(this._t('Filtros aplicados com sucesso.'));
+        });
+    }
+
+    if (this.el.clearAllFiltersBtns) {
+        this.el.clearAllFiltersBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.filters = { palletId: '', op: '', item: '', dateStart: '', dateEnd: '' };
+                this.renderDashboard();
+                this.renderHistory();
+                this.showToast(this._t('Filtros limpos com sucesso.'));
+            });
+        });
+    }
+
     this.el.editPalletBtn.addEventListener('click', () => this.reopenPallet());
     this.el.printPalletBtn.addEventListener('click', () => this.printCurrentViewedPallet());
 
@@ -175,7 +261,20 @@ export function populateOPDropdown() {
 }
 
 export function renderDashboard() {
-    const active = this.sapActivePallets || this.pallets.filter(p => p.status === 'Em processo');
+    let active = this.sapActivePallets || this.pallets.filter(p => p.status === 'Em processo');
+
+    // Aplicar filtros de pesquisa se houver filtros ativos
+    const activeFilters = hasActiveFilters(this.filters);
+    if (activeFilters) {
+        active = active.filter(p => checkFilters(p, this.filters));
+        if (this.el.activeFiltersIndicatorDashboard) {
+            this.el.activeFiltersIndicatorDashboard.style.display = 'flex';
+        }
+    } else {
+        if (this.el.activeFiltersIndicatorDashboard) {
+            this.el.activeFiltersIndicatorDashboard.style.display = 'none';
+        }
+    }
 
     // Ordenar de forma crescente (mais antigo primeiro, mais recente por último)
     const sortedActive = [...active].sort((a, b) => {
@@ -218,8 +317,7 @@ export function renderDashboard() {
                     const year = dateObj.getFullYear();
                     const hours = pad(dateObj.getHours());
                     const minutes = pad(dateObj.getMinutes());
-                    const seconds = pad(dateObj.getSeconds());
-                    fullDateTimeStr = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                    fullDateTimeStr = `${day}/${month}/${year} ${hours}:${minutes}`;
                 }
             }
         } catch (e) {
@@ -279,7 +377,22 @@ export function renderDashboard() {
 }
 
 export function renderHistory() {
-    const closed = this.pallets.filter(p => p.status === 'Finalizado').reverse();
+    let closed = this.pallets.filter(p => p.status === 'Finalizado');
+
+    // Aplicar filtros de pesquisa se houver filtros ativos
+    const activeFilters = hasActiveFilters(this.filters);
+    if (activeFilters) {
+        closed = closed.filter(p => checkFilters(p, this.filters));
+        if (this.el.activeFiltersIndicatorHistory) {
+            this.el.activeFiltersIndicatorHistory.style.display = 'flex';
+        }
+    } else {
+        if (this.el.activeFiltersIndicatorHistory) {
+            this.el.activeFiltersIndicatorHistory.style.display = 'none';
+        }
+    }
+
+    closed = closed.reverse();
     this.el.historyList.innerHTML = closed.map(p => {
         let dateStr = '---';
         try {
@@ -287,7 +400,7 @@ export function renderHistory() {
                 const dateObj = new Date(p.endTime.toString().replace(' ', 'T'));
                 if (!isNaN(dateObj)) {
                     const pad = (num) => num.toString().padStart(2, '0');
-                    dateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+                    dateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
                 }
             }
         } catch (e) {}
@@ -322,7 +435,7 @@ export function openPalletDetails(id) {
             const dateObj = new Date(rawDate.toString().replace(' ', 'T'));
             if (!isNaN(dateObj)) {
                 const pad = (num) => num.toString().padStart(2, '0');
-                detailDateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+                detailDateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
             }
         }
     } catch(e) {}
@@ -354,4 +467,71 @@ export function showConfirm(msg, onConfirm) {
     this.el.confirmMsg.textContent = msg;
     this.confirmCallback = onConfirm;
     this.el.confirmModal.classList.add('is-active');
+}
+
+function checkFilters(p, filters) {
+    if (!filters) return true;
+    
+    // 1. Pallet ID filter
+    if (filters.palletId && filters.palletId.trim() !== '') {
+        const query = filters.palletId.trim().toLowerCase();
+        if (!p.id || !p.id.toString().toLowerCase().includes(query)) {
+            return false;
+        }
+    }
+    
+    // 2. OP filter
+    if (filters.op && filters.op.trim() !== '') {
+        const query = filters.op.trim().toLowerCase();
+        if (!p.op || !p.op.toString().toLowerCase().includes(query)) {
+            return false;
+        }
+    }
+    
+    // 3. Item filter
+    if (filters.item && filters.item.trim() !== '') {
+        const query = filters.item.trim().toLowerCase();
+        const codeMatch = p.itemCode && p.itemCode.toString().toLowerCase().includes(query);
+        const nameMatch = p.material && p.material.toString().toLowerCase().includes(query);
+        if (!codeMatch && !nameMatch) {
+            return false;
+        }
+    }
+    
+    // 4. Date range filter
+    const rawDate = p.startTime || p.endTime;
+    if (rawDate) {
+        try {
+            const dateObj = new Date(rawDate.toString().replace(' ', 'T'));
+            if (!isNaN(dateObj)) {
+                // Get timestamp for start of day
+                const dateVal = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+                
+                if (filters.dateStart) {
+                    const startLimit = new Date(filters.dateStart);
+                    const startVal = new Date(startLimit.getFullYear(), startLimit.getMonth(), startLimit.getDate()).getTime();
+                    if (dateVal < startVal) return false;
+                }
+                
+                if (filters.dateEnd) {
+                    const endLimit = new Date(filters.dateEnd);
+                    const endVal = new Date(endLimit.getFullYear(), endLimit.getMonth(), endLimit.getDate()).getTime();
+                    if (dateVal > endVal) return false;
+                }
+            }
+        } catch(e) {}
+    }
+    
+    return true;
+}
+
+function hasActiveFilters(filters) {
+    if (!filters) return false;
+    return !!(
+        (filters.palletId && filters.palletId.trim() !== '') ||
+        (filters.op && filters.op.trim() !== '') ||
+        (filters.item && filters.item.trim() !== '') ||
+        filters.dateStart ||
+        filters.dateEnd
+    );
 }

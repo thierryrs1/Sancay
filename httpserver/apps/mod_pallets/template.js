@@ -33,8 +33,12 @@ export function getPortalTemplate(t) {
                             ${t('Painel de Controle')}
                         </h2>
                     </div>
-                    <div class="header-right">
-                        <div id="toggle-scale-status" class="scale-status">
+                    <div class="header-right" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+                        <button id="open-filter-btn" class="btn outline" style="display: flex !important; align-items: center !important; gap: 8px !important; padding: 6px 14px !important; border-radius: 8px !important; font-size: 0.85rem !important; cursor: pointer !important; background: var(--bg-card) !important; color: var(--text-normal) !important; border: 1px solid var(--border-color) !important; margin: 0 !important;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                            <span>${t('Filtros')}</span>
+                        </button>
+                        <div id="toggle-scale-status" class="scale-status" style="cursor: pointer !important; margin: 0 !important; display: flex !important; align-items: center !important;">
                             <div id="scale-status-dot" class="status-dot online"></div>
                             <span id="scale-status-text">${t('Balança Conectada')}</span>
                         </div>
@@ -64,6 +68,11 @@ export function getPortalTemplate(t) {
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                     <h3>${t('Pallets Em Processo')}</h3>
+                                    <div id="active-filters-indicator-dashboard" style="display: none; align-items: center !important; gap: 6px !important; background: rgba(37, 99, 235, 0.1) !important; border: 1px solid rgba(37, 99, 235, 0.2) !important; padding: 4px 10px !important; border-radius: 20px !important; margin-left: 12px !important; height: fit-content !important;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                        <span style="font-size: 0.75rem !important; font-weight: 600 !important; color: var(--primary) !important; white-space: nowrap !important; margin: 0 !important; padding: 0 !important; line-height: 1 !important;">${t('Filtrado')}</span>
+                                        <button class="clear-all-filters-btn" style="background: none !important; border: none !important; color: var(--primary) !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; font-size: 1rem !important; font-weight: bold !important; line-height: 1 !important;" title="${t('Limpar Filtros')}">&times;</button>
+                                    </div>
                                 </div>
                                 <button id="refresh-pallets-btn" class="icon-btn" title="${t('Recarregar Pallets')}" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 5px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -97,6 +106,17 @@ export function getPortalTemplate(t) {
 
                     <!-- History View -->
                     <div id="history" class="view">
+                        <div class="section-header" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 1.5rem !important;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <h3 style="margin: 0 !important; font-size: 1.25rem !important; font-weight: 600 !important; color: var(--text-strong) !important;">${t('Histórico de Pallets Encerrados')}</h3>
+                                <div id="active-filters-indicator-history" style="display: none; align-items: center !important; gap: 6px !important; background: rgba(37, 99, 235, 0.1) !important; border: 1px solid rgba(37, 99, 235, 0.2) !important; padding: 4px 10px !important; border-radius: 20px !important; margin-left: 12px !important; height: fit-content !important;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                    <span style="font-size: 0.75rem !important; font-weight: 600 !important; color: var(--primary) !important; white-space: nowrap !important; margin: 0 !important; padding: 0 !important; line-height: 1 !important;">${t('Filtrado')}</span>
+                                    <button class="clear-all-filters-btn" style="background: none !important; border: none !important; color: var(--primary) !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; font-size: 1rem !important; font-weight: bold !important; line-height: 1 !important;" title="${t('Limpar Filtros')}">&times;</button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="table-container">
                             <table>
                                 <thead>
@@ -201,6 +221,45 @@ export function getPortalTemplate(t) {
                     <div class="modal-footer">
                         <button id="edit-pallet-btn" class="btn primary">${t('Continuar Pallet')}</button>
                         <button id="print-pallet-btn" class="btn outline">${t('Imprimir Relatório')}</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Filters -->
+            <div id="filter-modal" class="modal">
+                <div class="modal-content" style="max-width: 500px !important;">
+                    <div class="modal-header">
+                        <h2 style="display: flex !important; align-items: center !important; gap: 8px !important; margin: 0 !important;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                            <span>${t('Filtros de Pesquisa')}</span>
+                        </h2>
+                        <button id="close-filter-modal" class="close-btn" style="background: none !important; border: none !important; font-size: 1.5rem !important; cursor: pointer !important;">×</button>
+                    </div>
+                    <div class="modal-body" style="padding: 1.5rem !important; display: block !important;">
+                        <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
+                            <label for="filter-pallet-id" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('ID do Pallet')}</label>
+                            <input type="text" id="filter-pallet-id" placeholder="${t('Ex: 1-5/10')}" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
+                            <label for="filter-op" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Ordem de Produção (OP)')}</label>
+                            <input type="text" id="filter-op" placeholder="${t('Ex: 5/10')}" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
+                            <label for="filter-item" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Código ou Descrição do Item')}</label>
+                            <input type="text" id="filter-item" placeholder="${t('Ex: TST-PA01 ou Ração')}" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem !important; display: block !important;">
+                            <label style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Data de Criação (Período)')}</label>
+                            <div style="display: flex !important; gap: 12px !important; align-items: center !important;">
+                                <input type="date" id="filter-date-start" style="flex: 1 !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                                <span style="color: var(--text-muted) !important; font-weight: 600 !important; margin: 0 !important;">${t('até')}</span>
+                                <input type="date" id="filter-date-end" style="flex: 1 !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display: flex !important; justify-content: flex-end !important; gap: 12px !important; padding: 1rem 1.5rem !important; border-top: 1px solid var(--border-color) !important;">
+                        <button id="clear-filter-btn" class="btn outline" style="padding: 10px 20px !important; border-radius: 8px !important; cursor: pointer !important;">${t('Limpar Filtros')}</button>
+                        <button id="apply-filter-btn" class="btn primary" style="padding: 10px 20px !important; border-radius: 8px !important; cursor: pointer !important;">${t('Aplicar Filtros')}</button>
                     </div>
                 </div>
             </div>

@@ -56,6 +56,13 @@ export class SancayPortal {
         this.confirmCallback = null;
         this.translations = {};
         this.isSidebarCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+        this.filters = {
+            palletId: '',
+            op: '',
+            item: '',
+            dateStart: '',
+            dateEnd: ''
+        };
 
         // Initialize appData structure
         window.app = window.app || {};
