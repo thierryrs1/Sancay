@@ -206,13 +206,20 @@ export function renderDashboard() {
             return opA === opB;
         })?.[3]) || '';
 
-        // Formatação completa e resiliente de Data e Hora
+        // Formatação completa e resiliente de Data e Hora com dois dígitos garantidos
         let fullDateTimeStr = '---';
         try {
             if (p.startTime) {
                 const dateObj = new Date(p.startTime.toString().replace(' ', 'T'));
                 if (!isNaN(dateObj)) {
-                    fullDateTimeStr = dateObj.toLocaleString();
+                    const pad = (num) => num.toString().padStart(2, '0');
+                    const day = pad(dateObj.getDate());
+                    const month = pad(dateObj.getMonth() + 1);
+                    const year = dateObj.getFullYear();
+                    const hours = pad(dateObj.getHours());
+                    const minutes = pad(dateObj.getMinutes());
+                    const seconds = pad(dateObj.getSeconds());
+                    fullDateTimeStr = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
                 }
             }
         } catch (e) {
@@ -274,7 +281,16 @@ export function renderDashboard() {
 export function renderHistory() {
     const closed = this.pallets.filter(p => p.status === 'Finalizado').reverse();
     this.el.historyList.innerHTML = closed.map(p => {
-        const dateStr = p.endTime ? new Date(p.endTime).toLocaleString() : '---';
+        let dateStr = '---';
+        try {
+            if (p.endTime) {
+                const dateObj = new Date(p.endTime.toString().replace(' ', 'T'));
+                if (!isNaN(dateObj)) {
+                    const pad = (num) => num.toString().padStart(2, '0');
+                    dateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+                }
+            }
+        } catch (e) {}
         const opStr = p.op || '---';
         const boxesCount = p.boxes ? p.boxes.length : 0;
         const totalWeight = typeof p.totalWeight === 'number' ? p.totalWeight.toFixed(2) : '0.00';
@@ -298,7 +314,19 @@ export function openPalletDetails(id) {
     if (!p) return;
     document.getElementById('modal-op').textContent = p.op;
     document.getElementById('modal-material').textContent = p.material;
-    document.getElementById('modal-date').textContent = new Date(p.endTime || p.startTime).toLocaleString();
+    
+    let detailDateStr = '---';
+    try {
+        const rawDate = p.endTime || p.startTime;
+        if (rawDate) {
+            const dateObj = new Date(rawDate.toString().replace(' ', 'T'));
+            if (!isNaN(dateObj)) {
+                const pad = (num) => num.toString().padStart(2, '0');
+                detailDateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`;
+            }
+        }
+    } catch(e) {}
+    document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
     document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
     document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${new Date(b.timestamp).toLocaleTimeString()}</td><td class="sancay-td"><strong class="sancay-value">${b.weight.toFixed(2)} kg</strong></td></tr>`).join('');
