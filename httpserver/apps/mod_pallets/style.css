@@ -1180,6 +1180,7 @@ tr:hover td {
 
 /* Toast Floating Notification (Evita Layout Shifts) */
 .toast {
+    display: none;
     position: fixed !important;
     bottom: 2rem !important;
     right: 2rem !important;
