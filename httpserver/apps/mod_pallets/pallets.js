@@ -573,15 +573,42 @@ export function printPallet(p) {
 export function deleteBox(idx) {
     if (!this.currentPallet || !this.currentPallet.boxes[idx]) return;
     const box = this.currentPallet.boxes[idx];
+    
+    // Log para fins de teste conforme solicitado
+    console.log('=== TESTE DE EXCLUSÃO DE CAIXA ===');
+    console.log('DocEntry (Pallet):', this.currentPallet.docEntry);
+    console.log('LineNum/LineId (Caixa):', box.lineId);
+    console.log('Box Code:', box.code);
+    console.log('==================================');
+
     if (box.status && box.status.toUpperCase() === 'APONTADO') {
         this.showToast(this._t('Caixas já apontadas no SAP não podem ser excluídas!'));
         return;
     }
 
     this.showConfirm(`${this._t('Excluir Caixa')} #${idx + 1}?`, () => {
-        this.currentPallet.boxes.splice(idx, 1);
-        this.currentPallet.totalWeight = this.currentPallet.boxes.reduce((s, b) => s + b.weight, 0);
-        this.saveData(); this.updateProcessView(); this.updateStats(); this.showToast(this._t('Excluída.'));
+        document.getElementById('bs-loading').classList.remove('is-hidden');
+        
+        const docEntry = this.currentPallet.docEntry;
+        const lineNum = box.lineId;
+        const dadosExclusao = `@${docEntry}@@${lineNum}@`;
+
+        getData('postAux', 'deletaCaixa', dadosExclusao, (err, res) => {
+            document.getElementById('bs-loading').classList.add('is-hidden');
+            if (err) {
+                console.error('Erro ao deletar caixa no SAP:', err);
+                this.showToast(this._t('Erro ao excluir caixa no SAP.'));
+                return;
+            }
+
+            console.log('Caixa excluída com sucesso no SAP:', res);
+            this.currentPallet.boxes.splice(idx, 1);
+            this.currentPallet.totalWeight = this.currentPallet.boxes.reduce((s, b) => s + b.weight, 0);
+            this.saveData(); 
+            this.updateProcessView(); 
+            this.updateStats(); 
+            this.showToast(this._t('Excluída com sucesso!'));
+        });
     });
 }
 
