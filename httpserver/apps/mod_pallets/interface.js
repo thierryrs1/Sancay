@@ -226,6 +226,15 @@ export function switchView(viewId) {
 
     this.updateStats();
     this.updateTitle(viewId);
+
+    // Exibe o botão de filtros apenas no Painel de Controle (dashboard)
+    if (this.el.openFilterBtn) {
+        if (viewId === 'dashboard') {
+            this.el.openFilterBtn.style.setProperty('display', 'flex', 'important');
+        } else {
+            this.el.openFilterBtn.style.setProperty('display', 'none', 'important');
+        }
+    }
 }
 
 export function updateTitle(viewId) {

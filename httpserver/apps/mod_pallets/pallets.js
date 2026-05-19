@@ -273,8 +273,6 @@ export async function registerBox() {
             ]
         };
 
-        console.log('Enviando caixa para o SAP (JSON):', JSON.stringify(updatePayload, null, 2));
-
         const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -310,8 +308,6 @@ export function closePallet() {
             "U_SPS_Printed": "N",
             "SPS_PALLET_GROUP_LCollection": []
         };
-        console.log('JSON pré-configurado de fechamento (FINALIZADO) para testar no Postman:', JSON.stringify(patchTestPayload, null, 2));
-
         document.getElementById('bs-loading').classList.remove('is-hidden');
 
         const palletCode = this.currentPallet.id;
@@ -324,12 +320,10 @@ export function closePallet() {
                     else resolve(res);
                 });
             });
-            console.log('Etapa 1 (Encerrar): Caixas marcadas como PESADO.');
 
             // ETAPA 2: Gerar o Receipt na Service Layer
             const apontamentoOk = await this.apontarProducao();
             if (!apontamentoOk) throw new Error('Falha ao gerar Receipt na Service Layer.');
-            console.log('Etapa 2 (Encerrar): Receipt gerado na Service Layer.');
 
             // ETAPA 3: Mudar de PESADO para APONTADO
             await new Promise((resolve, reject) => {
@@ -338,7 +332,6 @@ export function closePallet() {
                     else resolve(res);
                 });
             });
-            console.log('Etapa 3 (Encerrar): Caixas marcadas como APONTADO.');
 
             // ETAPA 4: Atualizar o cabeçalho do Pallet para FINALIZADO no SAP
             const updatePayload = {
@@ -351,8 +344,6 @@ export function closePallet() {
                 "U_SPS_Printed": "N",
                 "SPS_PALLET_GROUP_LCollection": []
             };
-
-            console.log('Enviando fechamento (FINALIZADO) para o SAP:', JSON.stringify(updatePayload, null, 2));
 
             const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
                 method: 'POST',
@@ -392,8 +383,6 @@ export async function apontarProducao() {
     return new Promise((resolve) => {
         const dados = this.currentPallet.id;
 
-        console.log('Buscando JSON de apontamento para o PalletCode:', dados);
-
         getData('postAux', 'apontaPesados', dados, (err, payload) => {
             if (err || !payload) {
                 console.error('Erro ao buscar JSON de apontamento:', err);
@@ -401,16 +390,11 @@ export async function apontarProducao() {
                 return resolve(false);
             }
 
-            console.log('Payload bruto recebido de apontaPesados:');
-            console.log(JSON.stringify(payload, null, 2));
-
             let receiptPayload;
             try {
                 const rawString = (payload && payload.value && payload.value[0]) ? payload.value[0][0] : null;
-                console.log('Conteúdo extraído para parse (string crua):', rawString);
                 
                 if (!rawString || rawString.trim() === "" || rawString === "{}") {
-                    console.log('Nenhum dado de apontamento pendente no SAP para este pallet. Pulando geração de Receipt.');
                     this.showToast(this._t('Nenhum apontamento pendente.'));
                     return resolve(true);
                 }
@@ -418,13 +402,9 @@ export async function apontarProducao() {
                 receiptPayload = JSON.parse(rawString);
             } catch (parseErr) {
                 console.error('Erro ao extrair o JSON do Receipt:', parseErr);
-                console.error('Dados completos recebidos:', payload);
                 this.showToast(this._t('Erro na estrutura do apontamento.'));
                 return resolve(false);
             }
-
-            console.log('JSON pronto para enviar à Service Layer (/odata4/v1/Receipt):');
-            console.log(JSON.stringify(receiptPayload, null, 2));
 
             serviceLayerPost('/odata4/v1/Receipt', receiptPayload, (sErr, result) => {
                 if (sErr) {
@@ -432,7 +412,6 @@ export async function apontarProducao() {
                     this.showToast(this._t('Erro no apontamento da Service Layer.'));
                     resolve(false);
                 } else {
-                    console.log('Apontamento realizado com sucesso:', result);
                     this.showToast(this._t('Produção apontada com sucesso!'));
                     resolve(true);
                 }
@@ -456,11 +435,9 @@ export function pauseProduction() {
                     else resolve(res);
                 });
             });
-            console.log('Etapa 1: Caixas marcadas como PESADO.');
 
             const apontamentoOk = await this.apontarProducao();
             if (!apontamentoOk) throw new Error('Falha ao gerar Receipt na Service Layer.');
-            console.log('Etapa 2: Receipt gerado na Service Layer.');
 
             await new Promise((resolve, reject) => {
                 getData('postAux', 'postApontado', palletCode, (err, res) => {
@@ -468,7 +445,6 @@ export function pauseProduction() {
                     else resolve(res);
                 });
             });
-            console.log('Etapa 3: Caixas marcadas como APONTADO.');
 
             this.showToast(this._t('Produção pausada e apontada com sucesso!'));
 
@@ -573,13 +549,6 @@ export function printPallet(p) {
 export function deleteBox(idx) {
     if (!this.currentPallet || !this.currentPallet.boxes[idx]) return;
     const box = this.currentPallet.boxes[idx];
-    
-    // Log para fins de teste conforme solicitado
-    console.log('=== TESTE DE EXCLUSÃO DE CAIXA ===');
-    console.log('DocEntry (Pallet):', this.currentPallet.docEntry);
-    console.log('LineNum/LineId (Caixa):', box.lineId);
-    console.log('Box Code:', box.code);
-    console.log('==================================');
 
     if (box.status && box.status.toUpperCase() === 'APONTADO') {
         this.showToast(this._t('Caixas já apontadas no SAP não podem ser excluídas!'));
@@ -633,7 +602,6 @@ export function fetchClosedPallets() {
         }
 
         const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
-        console.log('=== API getPalletsFinalizados ===', sapPallets);
 
         // Mapear os pallets básicos do SAP
         const mappedPallets = sapPallets.map(p => {
