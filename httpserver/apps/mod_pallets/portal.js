@@ -6,7 +6,10 @@ import { getData } from './api.js';
 import {
     toggleScale,
     simulateWeight,
-    startScaleSimulation
+    startScaleSimulation,
+    openScaleAuthModal,
+    closeScaleAuthModal,
+    submitScaleAuth
 } from './scale.js';
 
 // Import UI functions
@@ -69,8 +72,6 @@ export class SancayPortal {
         window.app = window.app || {};
         window.app.appData = window.app.appData || {};
         window.app.appData.selectedOrder = [];
-
-        console.log('Sancay Portal Modernized Initialized (Modularized)');
 
         // SAP Credentials from .env
         this.sapConfig = {
@@ -168,6 +169,9 @@ Object.assign(SancayPortal.prototype, {
     toggleScale,
     simulateWeight,
     startScaleSimulation,
+    openScaleAuthModal,
+    closeScaleAuthModal,
+    submitScaleAuth,
 
     // UI/UX Operations
     mapElements,

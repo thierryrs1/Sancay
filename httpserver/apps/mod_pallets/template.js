@@ -298,6 +298,34 @@ export function getPortalTemplate(t) {
                     </div>
                 </div>
             </div>
+
+            <!-- Modal para Autorização da Balança -->
+            <div id="scale-auth-modal" class="modal">
+                <div class="modal-content" style="max-width: 400px !important;">
+                    <div class="modal-header">
+                        <h2 style="display: flex !important; align-items: center !important; gap: 10px !important; margin: 0 !important; color: var(--primary) !important;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <span>${t('Autorização de Gestor')}</span>
+                        </h2>
+                        <button id="close-scale-auth-modal" class="close-btn" style="background: none !important; border: none !important; font-size: 1.5rem !important; cursor: pointer !important;">×</button>
+                    </div>
+                    <div class="modal-body" style="padding: 1.5rem !important; display: block !important;">
+                        <p style="margin-bottom: 1.25rem !important; font-size: 0.9rem !important; color: var(--text-secondary) !important;">${t('Insira as credenciais de gestor para alterar o status da balança.')}</p>
+                        <div class="form-group" style="margin-bottom: 1rem !important; display: block !important;">
+                            <label for="scale-auth-user" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; text-align: left !important;">${t('Usuário')}</label>
+                            <input type="text" id="scale-auth-user" placeholder="${t('Digite o usuário')}" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem !important; display: block !important;">
+                            <label for="scale-auth-pass" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; text-align: left !important;">${t('Senha')}</label>
+                            <input type="password" id="scale-auth-pass" placeholder="${t('Digite a senha')}" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display: flex !important; gap: 12px !important; padding: 1rem 1.5rem !important; border-top: 1px solid var(--border-color) !important;">
+                        <button id="cancel-scale-auth-btn" class="btn outline" style="flex: 1 !important; padding: 10px !important; border-radius: 8px !important; cursor: pointer !important;">${t('Cancelar')}</button>
+                        <button id="confirm-scale-auth-btn" class="btn primary" style="flex: 1 !important; padding: 10px !important; border-radius: 8px !important; cursor: pointer !important;">${t('Autorizar')}</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="print-area" class="print-only">

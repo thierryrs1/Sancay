@@ -570,7 +570,6 @@ export function deleteBox(idx) {
                 return;
             }
 
-            console.log('Caixa excluída com sucesso no SAP:', res);
             this.currentPallet.boxes.splice(idx, 1);
             this.currentPallet.totalWeight = this.currentPallet.boxes.reduce((s, b) => s + b.weight, 0);
             this.saveData(); 

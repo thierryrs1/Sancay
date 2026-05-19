@@ -50,7 +50,13 @@ export function mapElements() {
         filterDateEnd: document.getElementById('filter-date-end'),
         activeFiltersIndicatorDashboard: document.getElementById('active-filters-indicator-dashboard'),
         activeFiltersIndicatorHistory: document.getElementById('active-filters-indicator-history'),
-        clearAllFiltersBtns: document.querySelectorAll('.clear-all-filters-btn')
+        clearAllFiltersBtns: document.querySelectorAll('.clear-all-filters-btn'),
+        scaleAuthModal: document.getElementById('scale-auth-modal'),
+        closeScaleAuthModalBtn: document.getElementById('close-scale-auth-modal'),
+        cancelScaleAuthBtn: document.getElementById('cancel-scale-auth-btn'),
+        confirmScaleAuthBtn: document.getElementById('confirm-scale-auth-btn'),
+        scaleAuthUser: document.getElementById('scale-auth-user'),
+        scaleAuthPass: document.getElementById('scale-auth-pass')
     };
 }
 
@@ -79,7 +85,7 @@ export function bindEvents() {
     });
 
     this.el.startPalletBtn.addEventListener('click', () => this.startNewPallet());
-    this.el.toggleScaleStatusBtn.addEventListener('click', () => this.toggleScale());
+    this.el.toggleScaleStatusBtn.addEventListener('click', () => this.openScaleAuthModal());
     if (this.el.simulateWeightBtn) {
         this.el.simulateWeightBtn.addEventListener('click', () => this.simulateWeight());
     }
@@ -201,6 +207,21 @@ export function bindEvents() {
     this.el.cancelActionBtn.addEventListener('click', () => {
         this.el.confirmModal.classList.remove('is-active');
     });
+
+    if (this.el.closeScaleAuthModalBtn) {
+        this.el.closeScaleAuthModalBtn.addEventListener('click', () => this.closeScaleAuthModal());
+    }
+    if (this.el.cancelScaleAuthBtn) {
+        this.el.cancelScaleAuthBtn.addEventListener('click', () => this.closeScaleAuthModal());
+    }
+    if (this.el.confirmScaleAuthBtn) {
+        this.el.confirmScaleAuthBtn.addEventListener('click', () => this.submitScaleAuth());
+    }
+    if (this.el.scaleAuthPass) {
+        this.el.scaleAuthPass.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.submitScaleAuth();
+        });
+    }
 }
 
 export function toggleSidebar() {
