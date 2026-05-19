@@ -633,27 +633,60 @@ export function fetchClosedPallets() {
         }
 
         const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
+        console.log('=== API getPalletsFinalizados ===', sapPallets);
 
         // Mapear os pallets básicos do SAP
         const mappedPallets = sapPallets.map(p => {
-            const endTime = p[4] || p.CreateDate;
+            let p_status = 'FINALIZADO';
+            let endTime = '';
+            let opCode = '';
+            let caixasCount = 0;
+            let pesoTotal = 0;
+            let palletId = '';
+
+            if (Array.isArray(p)) {
+                palletId = p[0] || '';
+                endTime = p[1] || '';
+                opCode = p[2] || '';
+                caixasCount = parseInt(p[3]) || 0;
+                pesoTotal = parseFloat(p[4]) || 0;
+                if (p[5]) p_status = p[5].toString().toUpperCase();
+            } else {
+                // Fallback caso venha como objeto (segurança)
+                palletId = p.U_SPS_PalletCode || p.id || '';
+                opCode = p.U_SPS_OPCode || p.op || '';
+                endTime = p.U_SPS_CreateDate || p.CreateDate || '';
+                caixasCount = parseInt(p.Caixas || 0);
+                pesoTotal = parseFloat(p.Peso || 0);
+                p_status = p.U_SPS_Status || p.Status || 'FINALIZADO';
+            }
+
             let formattedTime = '---';
-            try {
-                if (endTime) {
-                    const dateObj = new Date(endTime.toString().replace(' ', 'T')); // Garante formato ISO
-                    if (!isNaN(dateObj)) formattedTime = dateObj.toLocaleTimeString();
+            if (endTime) {
+                const endStr = endTime.toString().trim();
+                // Verifica formato YYYY-MM-DD HH:MM:SS
+                if (endStr.includes('-') && endStr.includes(':')) {
+                    const [dPart, tPart] = endStr.split(' ');
+                    const [y, m, d] = dPart.split('-');
+                    const [h, min] = tPart ? tPart.split(':') : ['00', '00'];
+                    formattedTime = `${d}/${m}/${y} ${h}:${min}`;
+                } else if (endStr.includes('/')) {
+                    // Tenta formatar se já vier com /
+                    formattedTime = endStr;
+                } else {
+                    formattedTime = endStr;
                 }
-            } catch (e) { console.warn('Data inválida:', endTime); }
+            }
 
             return {
-                id: p[0] || p.U_SPS_PalletCode,
-                op: p[1] || p.U_SPS_OPCode,
+                id: palletId,
+                op: opCode,
                 material: '',
-                status: 'Finalizado',
+                status: p_status,
                 displayTime: formattedTime,
                 endTime: endTime,
-                boxes: Array(parseInt(p[2] || p.Caixas || 0)).fill({}),
-                totalWeight: parseFloat(p[3] || p.Peso || 0),
+                boxes: Array(caixasCount).fill({}),
+                totalWeight: pesoTotal,
                 itemCode: ''
             };
         });

@@ -394,20 +394,19 @@ export function renderHistory() {
 
     closed = closed.reverse();
     this.el.historyList.innerHTML = closed.map(p => {
-        let dateStr = '---';
-        try {
-            if (p.endTime) {
-                const dateObj = new Date(p.endTime.toString().replace(' ', 'T'));
-                if (!isNaN(dateObj)) {
-                    const pad = (num) => num.toString().padStart(2, '0');
-                    dateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
-                }
-            }
-        } catch (e) {}
+        const dateStr = p.displayTime && p.displayTime !== '---' ? p.displayTime : '---';
         const opStr = p.op || '---';
         const boxesCount = p.boxes ? p.boxes.length : 0;
         const totalWeight = typeof p.totalWeight === 'number' ? p.totalWeight.toFixed(2) : '0.00';
         
+        let statusBadgeStyle = 'background: rgba(21, 128, 61, 0.12) !important; color: #15803d !important; border: 1px solid rgba(21, 128, 61, 0.3) !important;';
+        let statusLabel = 'FINALIZADO';
+
+        if (p.status && p.status.toUpperCase() === 'REMOVIDO') {
+            statusBadgeStyle = 'background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.2) !important;';
+            statusLabel = 'REMOVIDO';
+        }
+
         return `
             <tr onclick="openPalletDetails('${p.id}')">
                 <td class="sancay-td">#${p.id}</td>
@@ -415,7 +414,7 @@ export function renderHistory() {
                 <td class="sancay-td">${opStr}</td>
                 <td class="sancay-td">${boxesCount}</td>
                 <td class="sancay-td">${totalWeight} kg</td>
-                <td class="sancay-td"><span class="badge" style="background: var(--accent-success)">${this._t('Finalizado')}</span></td>
+                <td class="sancay-td"><span class="badge" style="${statusBadgeStyle} font-size: 0.7rem !important; padding: 4px 10px !important; border-radius: 12px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important;">${this._t(statusLabel)}</span></td>
             </tr>
         `;
     }).join('') || `<tr><td colspan="6" style="text-align:center" class="sancay-td">${this._t('Sem registros.')}</td></tr>`;
