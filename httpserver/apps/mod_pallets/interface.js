@@ -85,7 +85,13 @@ export function bindEvents() {
     });
 
     this.el.startPalletBtn.addEventListener('click', () => this.startNewPallet());
-    this.el.toggleScaleStatusBtn.addEventListener('click', () => this.openScaleAuthModal());
+    this.el.toggleScaleStatusBtn.addEventListener('click', () => {
+        if (this.isScaleConnected) {
+            this.openScaleAuthModal();
+        } else {
+            this.toggleScale();
+        }
+    });
     if (this.el.simulateWeightBtn) {
         this.el.simulateWeightBtn.addEventListener('click', () => this.simulateWeight());
     }
