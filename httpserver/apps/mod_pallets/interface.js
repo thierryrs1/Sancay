@@ -619,6 +619,15 @@ export function openPalletDetails(id) {
     this.viewedPalletId = id;
     const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === id)) || this.pallets.find(p => p.id === id);
     if (!p) return;
+
+    if (p.status && p.status.toUpperCase() === 'REMOVIDO') {
+        if (this.el.printPalletBtn) this.el.printPalletBtn.style.display = 'none';
+        if (this.el.editPalletBtn) this.el.editPalletBtn.style.display = 'none';
+    } else {
+        if (this.el.printPalletBtn) this.el.printPalletBtn.style.display = 'inline-block';
+        if (this.el.editPalletBtn) this.el.editPalletBtn.style.display = 'inline-block';
+    }
+
     document.getElementById('modal-op').textContent = p.op;
     document.getElementById('modal-material').textContent = p.material;
     
@@ -805,25 +814,27 @@ export function handleHistorySort(columnId) {
 export function toggleHistoryFilterDropdown(event, columnId) {
     event.stopPropagation();
     
-    document.querySelectorAll('.excel-filter-dropdown').forEach(el => {
-        if (el.id !== `filter-dropdown-${columnId}`) {
-            el.classList.add('is-hidden');
-        }
-    });
-
-    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    const dropdown = document.getElementById('excel-filter-dropdown');
     if (!dropdown) return;
 
-    if (dropdown.classList.contains('is-hidden')) {
-        this.populateHistoryFilterDropdown(columnId);
-        dropdown.classList.remove('is-hidden');
-    } else {
+    if (!dropdown.classList.contains('is-hidden') && this.activeFilterColumn === columnId) {
         dropdown.classList.add('is-hidden');
+        this.activeFilterColumn = null;
+        return;
     }
+
+    this.activeFilterColumn = columnId;
+    this.populateHistoryFilterDropdown(columnId);
+    
+    dropdown.classList.remove('is-hidden');
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + 5}px`;
+    dropdown.style.left = `${Math.max(10, rect.right - 220)}px`;
 }
 
 export function populateHistoryFilterDropdown(columnId) {
-    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    const dropdown = document.getElementById('excel-filter-dropdown');
     if (!dropdown) return;
 
     const items = this.sapClosedPallets || [];
@@ -913,16 +924,18 @@ export function applyHistoryFilter(columnId) {
 
     this.historyColumnFilters[columnId] = checkedValues;
     
-    const triggerBtn = document.getElementById(`filter-dropdown-${columnId}`).closest('th').querySelector('.filter-trigger-btn');
-    const items = this.sapClosedPallets || [];
-    const totalUniqueValuesCount = new Set(items.map(p => getColumnValue(p, columnId))).size;
-    
-    if (checkedValues.size < totalUniqueValuesCount) {
-        triggerBtn.classList.add('active');
-        triggerBtn.style.color = 'var(--primary)';
-    } else {
-        triggerBtn.classList.remove('active');
-        triggerBtn.style.color = '';
+    const triggerBtn = document.querySelector(`th[ondblclick*="'${columnId}'"] .filter-trigger-btn`);
+    if (triggerBtn) {
+        const items = this.sapClosedPallets || [];
+        const totalUniqueValuesCount = new Set(items.map(p => getColumnValue(p, columnId))).size;
+        
+        if (checkedValues.size < totalUniqueValuesCount) {
+            triggerBtn.classList.add('active');
+            triggerBtn.style.color = 'var(--primary)';
+        } else {
+            triggerBtn.classList.remove('active');
+            triggerBtn.style.color = '';
+        }
     }
 
     this.closeHistoryFilter(columnId);
@@ -930,8 +943,9 @@ export function applyHistoryFilter(columnId) {
 }
 
 export function closeHistoryFilter(columnId) {
-    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    const dropdown = document.getElementById('excel-filter-dropdown');
     if (dropdown) {
         dropdown.classList.add('is-hidden');
     }
+    this.activeFilterColumn = null;
 }
