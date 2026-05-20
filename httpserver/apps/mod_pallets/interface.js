@@ -617,16 +617,21 @@ export function renderHistory() {
 
 export function openPalletDetails(id) {
     this.viewedPalletId = id;
-    const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === id)) || this.pallets.find(p => p.id === id);
+    const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id.trim() === id.trim())) || this.pallets.find(p => p.id.trim() === id.trim());
     if (!p) return;
 
-    if (p.status && p.status.toUpperCase() === 'REMOVIDO') {
-        if (this.el.printPalletBtn) this.el.printPalletBtn.style.display = 'none';
-        if (this.el.editPalletBtn) this.el.editPalletBtn.style.display = 'none';
-    } else {
-        if (this.el.printPalletBtn) this.el.printPalletBtn.style.display = 'inline-block';
-        if (this.el.editPalletBtn) this.el.editPalletBtn.style.display = 'inline-block';
-    }
+    const updateButtonsVisibility = (status) => {
+        const isCurrentlyRemoved = status && status.trim().toUpperCase() === 'REMOVIDO';
+        if (isCurrentlyRemoved) {
+            if (this.el.printPalletBtn) this.el.printPalletBtn.classList.add('is-hidden');
+            if (this.el.editPalletBtn) this.el.editPalletBtn.classList.add('is-hidden');
+        } else {
+            if (this.el.printPalletBtn) this.el.printPalletBtn.classList.remove('is-hidden');
+            if (this.el.editPalletBtn) this.el.editPalletBtn.classList.remove('is-hidden');
+        }
+    };
+
+    updateButtonsVisibility(p.status);
 
     document.getElementById('modal-op').textContent = p.op;
     document.getElementById('modal-material').textContent = p.material;
@@ -664,20 +669,26 @@ export function openPalletDetails(id) {
     .then(r => r.json())
     .then(sapData => {
         document.getElementById('bs-loading').classList.add('is-hidden');
-        if (sapData && sapData.SPS_PALLET_GROUP_LCollection) {
-            p.boxes = sapData.SPS_PALLET_GROUP_LCollection
-                .filter(l => l.U_SPS_Status !== 'REMOVIDO')
-                .map(l => ({
-                    lineId: l.LineId,
-                    weight: parseFloat(l.U_SPS_BoxWeight || 0),
-                    time: l.U_SPS_CreateDate,
-                    status: l.U_SPS_Status || 'EMPESAGEM',
-                    timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
-                    createTime: l.U_SPS_CreateTime
-                }));
-            p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
-            document.getElementById('modal-boxes').textContent = p.boxes.length;
-            document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+        if (sapData) {
+            if (sapData.U_SPS_Status) {
+                p.status = sapData.U_SPS_Status;
+                updateButtonsVisibility(p.status);
+            }
+            if (sapData.SPS_PALLET_GROUP_LCollection) {
+                p.boxes = sapData.SPS_PALLET_GROUP_LCollection
+                    .filter(l => l.U_SPS_Status !== 'REMOVIDO')
+                    .map(l => ({
+                        lineId: l.LineId,
+                        weight: parseFloat(l.U_SPS_BoxWeight || 0),
+                        time: l.U_SPS_CreateDate,
+                        status: l.U_SPS_Status || 'EMPESAGEM',
+                        timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
+                        createTime: l.U_SPS_CreateTime
+                    }));
+                p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
+                document.getElementById('modal-boxes').textContent = p.boxes.length;
+                document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+            }
         }
         renderList();
         this.el.palletModal.classList.add('is-active');
