@@ -25,7 +25,14 @@ import {
     openPalletDetails,
     updateStats,
     showToast,
-    showConfirm
+    showConfirm,
+    handleHistorySort,
+    toggleHistoryFilterDropdown,
+    populateHistoryFilterDropdown,
+    filterHistoryDropdownItems,
+    selectAllHistoryFilter,
+    applyHistoryFilter,
+    closeHistoryFilter
 } from './interface.js';
 
 // Import Pallet functions
@@ -81,10 +88,22 @@ export class SancayPortal {
             baseUrl: 'https://192.168.30.192:50000/b1s/v1/'
         };
 
+        // History Table Sorting and Column Filters (Excel-like)
+        this.historySortColumn = null;
+        this.historySortDirection = 'asc';
+        this.historyColumnFilters = {};
+
         // Expose functions to global scope for HTML onclick events
         window.openActivePallet = (id) => this.openActivePallet(id);
         window.openPalletDetails = (id) => this.openPalletDetails(id);
         window.deleteBox = (idx) => this.deleteBox(idx);
+        
+        window.handleHeaderDblClick = (columnId) => this.handleHistorySort(columnId);
+        window.toggleFilterDropdown = (event, columnId) => this.toggleHistoryFilterDropdown(event, columnId);
+        window.applyHistoryFilter = (columnId) => this.applyHistoryFilter(columnId);
+        window.closeHistoryFilter = (columnId) => this.closeHistoryFilter(columnId);
+        window.selectAllHistoryFilter = (columnId, checked) => this.selectAllHistoryFilter(columnId, checked);
+        window.filterHistoryDropdownItems = (columnId) => this.filterHistoryDropdownItems(columnId);
     }
 
     loadData() {
@@ -186,6 +205,13 @@ Object.assign(SancayPortal.prototype, {
     updateStats,
     showToast,
     showConfirm,
+    handleHistorySort,
+    toggleHistoryFilterDropdown,
+    populateHistoryFilterDropdown,
+    filterHistoryDropdownItems,
+    selectAllHistoryFilter,
+    applyHistoryFilter,
+    closeHistoryFilter,
 
     // Pallet Core Operations
     fetchPendingPallets,

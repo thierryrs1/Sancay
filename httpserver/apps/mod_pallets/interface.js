@@ -124,6 +124,13 @@ export function mapElements() {
 }
 
 export function bindEvents() {
+    // Fechar dropdowns de filtro do Excel ao clicar fora
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.excel-filter-dropdown').forEach(el => {
+            el.classList.add('is-hidden');
+        });
+    });
+
     if (this.el.toggleSidebarBtn) {
         this.el.toggleSidebarBtn.addEventListener('click', () => this.toggleSidebar());
     }
@@ -504,9 +511,9 @@ export function renderHistory() {
         `;
         return;
     }
-    let closed = this.sapClosedPallets;
+    let closed = this.sapClosedPallets || [];
 
-    // Aplicar filtros de pesquisa se houver filtros ativos
+    // 1. Aplicar filtros gerais de pesquisa se houver
     const activeFilters = hasActiveFilters(this.filters);
     if (activeFilters) {
         closed = closed.filter(p => checkFilters(p, this.filters));
@@ -519,7 +526,68 @@ export function renderHistory() {
         }
     }
 
-    closed = closed.reverse();
+    // 2. Aplicar filtros de coluna do Excel
+    Object.keys(this.historyColumnFilters).forEach(columnId => {
+        const checkedSet = this.historyColumnFilters[columnId];
+        if (checkedSet) {
+            closed = closed.filter(p => {
+                const val = getColumnValue(p, columnId);
+                return checkedSet.has(val);
+            });
+        }
+    });
+
+    // 3. Aplicar ordenação
+    if (this.historySortColumn) {
+        const col = this.historySortColumn;
+        const dir = this.historySortDirection === 'asc' ? 1 : -1;
+        
+        closed = [...closed].sort((a, b) => {
+            let valA = getColumnValue(a, col);
+            let valB = getColumnValue(b, col);
+            
+            if (col === 'id') {
+                const numA = parseInt(a.id) || 0;
+                const numB = parseInt(b.id) || 0;
+                return (numA - numB) * dir;
+            }
+            if (col === 'boxes') {
+                const numA = a.boxes ? a.boxes.length : 0;
+                const numB = b.boxes ? b.boxes.length : 0;
+                return (numA - numB) * dir;
+            }
+            if (col === 'weight') {
+                const numA = typeof a.totalWeight === 'number' ? a.totalWeight : 0;
+                const numB = typeof b.totalWeight === 'number' ? b.totalWeight : 0;
+                return (numA - numB) * dir;
+            }
+            if (col === 'date') {
+                const dateA = a.endTime ? new Date(a.endTime.toString().replace(' ', 'T')) : new Date(0);
+                const dateB = b.endTime ? new Date(b.endTime.toString().replace(' ', 'T')) : new Date(0);
+                return (dateA - dateB) * dir;
+            }
+            
+            return valA.localeCompare(valB) * dir;
+        });
+    } else {
+        // Ordenação padrão: mais recente primeiro
+        closed = closed.slice().reverse();
+    }
+
+    // 4. Atualizar indicadores visuais de ordenação nos cabeçalhos
+    const columns = ['id', 'date', 'op', 'boxes', 'weight', 'status'];
+    columns.forEach(col => {
+        const span = document.querySelector(`.sort-indicator-${col}`);
+        if (span) {
+            if (this.historySortColumn === col) {
+                span.textContent = this.historySortDirection === 'asc' ? ' ▲' : ' ▼';
+                span.style.color = 'var(--primary)';
+            } else {
+                span.textContent = '';
+                span.style.color = '';
+            }
+        }
+    });
     this.el.historyList.innerHTML = closed.map(p => {
         const dateStr = p.displayTime && p.displayTime !== '---' ? p.displayTime : '---';
         const opStr = p.op || '---';
@@ -708,4 +776,162 @@ function hasActiveFilters(filters) {
         filters.dateStart ||
         filters.dateEnd
     );
+}
+
+// ==========================================
+// Excel-Like Column Filtering & Sorting Logic
+// ==========================================
+
+function getColumnValue(p, columnId) {
+    if (columnId === 'id') return `#${p.id}`;
+    if (columnId === 'date') return p.displayTime && p.displayTime !== '---' ? p.displayTime : '---';
+    if (columnId === 'op') return p.op || '---';
+    if (columnId === 'boxes') return p.boxes ? p.boxes.length.toString() : '0';
+    if (columnId === 'weight') return typeof p.totalWeight === 'number' ? `${p.totalWeight.toFixed(2)} kg` : '0.00 kg';
+    if (columnId === 'status') return p.status && p.status.toUpperCase() === 'REMOVIDO' ? 'REMOVIDO' : 'FINALIZADO';
+    return '';
+}
+
+export function handleHistorySort(columnId) {
+    if (this.historySortColumn === columnId) {
+        this.historySortDirection = this.historySortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        this.historySortColumn = columnId;
+        this.historySortDirection = 'asc';
+    }
+    this.renderHistory();
+}
+
+export function toggleHistoryFilterDropdown(event, columnId) {
+    event.stopPropagation();
+    
+    document.querySelectorAll('.excel-filter-dropdown').forEach(el => {
+        if (el.id !== `filter-dropdown-${columnId}`) {
+            el.classList.add('is-hidden');
+        }
+    });
+
+    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    if (!dropdown) return;
+
+    if (dropdown.classList.contains('is-hidden')) {
+        this.populateHistoryFilterDropdown(columnId);
+        dropdown.classList.remove('is-hidden');
+    } else {
+        dropdown.classList.add('is-hidden');
+    }
+}
+
+export function populateHistoryFilterDropdown(columnId) {
+    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    if (!dropdown) return;
+
+    const items = this.sapClosedPallets || [];
+    const values = [...new Set(items.map(p => getColumnValue(p, columnId)))].sort((a, b) => {
+        if (columnId === 'id' || columnId === 'boxes') {
+            const numA = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+            const numB = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+            return numA - numB;
+        }
+        if (columnId === 'weight') {
+            const numA = parseFloat(a.replace(/[^0-9.]/g, '')) || 0;
+            const numB = parseFloat(b.replace(/[^0-9.]/g, '')) || 0;
+            return numA - numB;
+        }
+        return a.localeCompare(b);
+    });
+
+    if (!this.historyColumnFilters[columnId]) {
+        this.historyColumnFilters[columnId] = new Set(values);
+    }
+
+    const checkedSet = this.historyColumnFilters[columnId];
+
+    dropdown.innerHTML = `
+        <div style="font-weight: 700 !important; margin-bottom: 6px !important; display: flex !important; justify-content: space-between !important; align-items: center !important;">
+            <span style="color: var(--text-strong) !important;">${this._t('Filtrar')}</span>
+            <span style="font-size: 0.75rem !important; color: var(--text-muted) !important; font-weight: normal !important;">${values.length} ${this._t('valores')}</span>
+        </div>
+        <input type="text" class="excel-filter-search" placeholder="${this._t('Pesquisar...')}" oninput="filterHistoryDropdownItems('${columnId}')" id="filter-search-${columnId}">
+        <div class="excel-filter-list" id="filter-list-${columnId}">
+            <label class="excel-filter-item select-all">
+                <input type="checkbox" onchange="selectAllHistoryFilter('${columnId}', this.checked)" ${checkedSet.size === values.length ? 'checked' : ''}>
+                <span style="font-weight: 600 !important;">(${this._t('Selecionar Tudo')})</span>
+            </label>
+            ${values.map(val => `
+                <label class="excel-filter-item">
+                    <input type="checkbox" value="${val.replace(/"/g, '&quot;')}" ${checkedSet.has(val) ? 'checked' : ''}>
+                    <span>${val}</span>
+                </label>
+            `).join('')}
+        </div>
+        <div class="excel-filter-actions">
+            <button class="excel-filter-btn cancel" onclick="closeHistoryFilter('${columnId}')">${this._t('Cancelar')}</button>
+            <button class="excel-filter-btn apply" onclick="applyHistoryFilter('${columnId}')">${this._t('Aplicar')}</button>
+        </div>
+    `;
+}
+
+export function filterHistoryDropdownItems(columnId) {
+    const searchVal = document.getElementById(`filter-search-${columnId}`).value.toLowerCase().trim();
+    const listItems = document.querySelectorAll(`#filter-list-${columnId} .excel-filter-item:not(.select-all)`);
+    
+    listItems.forEach(item => {
+        const text = item.querySelector('span').textContent.toLowerCase();
+        if (text.includes(searchVal)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+export function selectAllHistoryFilter(columnId, checked) {
+    const listContainer = document.getElementById(`filter-list-${columnId}`);
+    if (!listContainer) return;
+    const checkBoxes = listContainer.querySelectorAll('.excel-filter-item:not(.select-all) input[type="checkbox"]');
+    checkBoxes.forEach(cb => {
+        const parent = cb.closest('.excel-filter-item');
+        if (parent && parent.style.display !== 'none') {
+            cb.checked = checked;
+        }
+    });
+}
+
+export function applyHistoryFilter(columnId) {
+    const listContainer = document.getElementById(`filter-list-${columnId}`);
+    if (!listContainer) return;
+    
+    const checkBoxes = listContainer.querySelectorAll('.excel-filter-item:not(.select-all) input[type="checkbox"]');
+    
+    const checkedValues = new Set();
+    checkBoxes.forEach(cb => {
+        if (cb.checked) {
+            checkedValues.add(cb.value);
+        }
+    });
+
+    this.historyColumnFilters[columnId] = checkedValues;
+    
+    const triggerBtn = document.getElementById(`filter-dropdown-${columnId}`).closest('th').querySelector('.filter-trigger-btn');
+    const items = this.sapClosedPallets || [];
+    const totalUniqueValuesCount = new Set(items.map(p => getColumnValue(p, columnId))).size;
+    
+    if (checkedValues.size < totalUniqueValuesCount) {
+        triggerBtn.classList.add('active');
+        triggerBtn.style.color = 'var(--primary)';
+    } else {
+        triggerBtn.classList.remove('active');
+        triggerBtn.style.color = '';
+    }
+
+    this.closeHistoryFilter(columnId);
+    this.renderHistory();
+}
+
+export function closeHistoryFilter(columnId) {
+    const dropdown = document.getElementById(`filter-dropdown-${columnId}`);
+    if (dropdown) {
+        dropdown.classList.add('is-hidden');
+    }
 }

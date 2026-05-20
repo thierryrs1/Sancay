@@ -1284,3 +1284,124 @@ tr:hover td {
     font-size: 0.95rem !important;
     pointer-events: none !important;
 }
+
+/* Excel-like Filtering Dropdown styles */
+.excel-filter-dropdown {
+    position: fixed !important;
+    z-index: 10000 !important;
+    min-width: 220px !important;
+    max-width: 280px !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    padding: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: left !important;
+    cursor: default !important;
+    font-weight: normal !important;
+    font-size: 0.85rem !important;
+    color: var(--text-normal) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.excel-filter-dropdown.is-hidden {
+    display: none !important;
+}
+
+.excel-filter-search {
+    width: 100% !important;
+    padding: 6px 10px !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    background: var(--bg-main) !important;
+    color: var(--text-strong) !important;
+    font-size: 0.8rem !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+
+.excel-filter-search:focus {
+    border-color: var(--primary) !important;
+}
+
+.excel-filter-list {
+    max-height: 160px !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 4px 0 !important;
+}
+
+.excel-filter-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 6px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: background 0.15s !important;
+    user-select: none !important;
+}
+
+.excel-filter-item:hover {
+    background: rgba(37, 99, 235, 0.05) !important;
+}
+
+.excel-filter-item input[type="checkbox"] {
+    cursor: pointer !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.excel-filter-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding-top: 8px !important;
+    margin-top: 4px !important;
+}
+
+.excel-filter-btn {
+    padding: 4px 12px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s !important;
+}
+
+.excel-filter-btn.apply {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+.excel-filter-btn.apply:hover {
+    background: var(--primary-dark) !important;
+}
+
+.excel-filter-btn.cancel {
+    background: transparent !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
+.excel-filter-btn.cancel:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--text-strong) !important;
+}
+
+th.sancay-th {
+    user-select: none !important;
+}
+
+th.sancay-th .filter-trigger-btn.active {
+    color: var(--primary) !important;
+}

@@ -121,12 +121,72 @@ export function getPortalTemplate(t) {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th class="sancay-th">${t('ID')}</th>
-                                        <th class="sancay-th">${t('Data/Hora')}</th>
-                                        <th class="sancay-th">${t('OP')}</th>
-                                        <th class="sancay-th">${t('Caixas')}</th>
-                                        <th class="sancay-th">${t('Peso Total')}</th>
-                                        <th class="sancay-th">${t('Status')}</th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('id')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('ID')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-id" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'id')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('date')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('Data/Hora')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-date" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'date')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('op')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('OP')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-op" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'op')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('boxes')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('Caixas')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-boxes" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'boxes')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('weight')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('Peso Total')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-weight" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'weight')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="sancay-th" ondblclick="handleHeaderDblClick('status')" style="position: relative !important; cursor: pointer !important; user-select: none !important;">
+                                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;">
+                                                <span>${t('Status')}</span>
+                                                <div style="display: flex !important; align-items: center !important; gap: 4px !important;">
+                                                    <span class="sort-indicator-status" style="font-size: 0.75rem !important;"></span>
+                                                    <button class="filter-trigger-btn" onclick="toggleFilterDropdown(event, 'status')" style="background: none !important; border: none !important; cursor: pointer !important; color: var(--text-muted) !important; padding: 2px !important;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="history-list"></tbody>
@@ -326,6 +386,9 @@ export function getPortalTemplate(t) {
                     </div>
                 </div>
             </div>
+
+            <!-- Excel-like Dynamic Dropdown positioned at the body level -->
+            <div id="excel-filter-dropdown" class="excel-filter-dropdown is-hidden" onclick="event.stopPropagation()"></div>
         </div>
 
         <div id="print-area" class="print-only">
