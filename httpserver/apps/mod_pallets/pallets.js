@@ -6,6 +6,9 @@ export function fetchPendingPallets() {
     getData('getAux', 'getPalletsPendentes&dg_limit=1000', '', (err, data) => {
         if (err) {
             console.error('Erro ao buscar pallets pendentes:', err);
+            _this.sapActivePallets = _this.pallets.filter(p => p.status === 'Em processo');
+            _this.renderDashboard();
+            _this.updateStats();
             return;
         }
 
@@ -624,6 +627,8 @@ export function fetchClosedPallets() {
     getData('getAux', 'getPalletsFinalizados&dg_limit=1000', '', (err, data) => {
         if (err) {
             console.error('Erro ao buscar pallets finalizados:', err);
+            _this.sapClosedPallets = _this.pallets.filter(p => p.status === 'Finalizado');
+            _this.renderHistory();
             return;
         }
 

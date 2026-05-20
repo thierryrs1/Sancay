@@ -360,7 +360,20 @@ export function populateOPDropdown() {
 }
 
 export function renderDashboard() {
-    let active = this.sapActivePallets || this.pallets.filter(p => p.status === 'Em processo');
+    if (this.sapActivePallets === undefined) {
+        this.el.activePalletsList.innerHTML = `
+            <div class="skeleton-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 3rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color); min-height: 250px;">
+                <div class="spinner" style="margin-bottom: 1rem;">
+                    <div class="bounce1"></div>
+                    <div class="bounce2"></div>
+                    <div></div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.95rem; font-weight: 600;">${this._t('Carregando pallets ativos...')}</p>
+            </div>
+        `;
+        return;
+    }
+    let active = this.sapActivePallets;
 
     // Aplicar filtros de pesquisa se houver filtros ativos
     const activeFilters = hasActiveFilters(this.filters);
@@ -476,7 +489,22 @@ export function renderDashboard() {
 }
 
 export function renderHistory() {
-    let closed = this.sapClosedPallets || this.pallets.filter(p => p.status === 'Finalizado');
+    if (this.sapClosedPallets === undefined) {
+        this.el.historyList.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center; padding: 2rem;" class="sancay-td">
+                    <div class="spinner" style="margin: 0 auto 0.5rem auto !important; display: inline-block;">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div></div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">${this._t('Carregando histórico...')}</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    let closed = this.sapClosedPallets;
 
     // Aplicar filtros de pesquisa se houver filtros ativos
     const activeFilters = hasActiveFilters(this.filters);
