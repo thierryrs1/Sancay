@@ -614,7 +614,14 @@ export function openPalletDetails(id) {
 }
 
 export function updateStats() {
-    const active = this.sapActivePallets || this.pallets.filter(p => p.status === 'Em processo');
+    if (this.sapActivePallets === undefined) {
+        if (this.el.activePalletsCount) this.el.activePalletsCount.textContent = '--';
+        if (this.el.todayBoxesCount) this.el.todayBoxesCount.textContent = '--';
+        if (this.el.totalWeightCount) this.el.totalWeightCount.textContent = '--';
+        return;
+    }
+
+    const active = this.sapActivePallets;
 
     // Sum boxes and weight from active pallets
     const totalBoxes = active.reduce((acc, p) => acc + (p.boxes ? p.boxes.length : 0), 0);
