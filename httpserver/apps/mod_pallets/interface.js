@@ -1,3 +1,66 @@
+export function formatBoxDateTime(b) {
+    const formatD = (dateStr) => {
+        if (!dateStr) return '';
+        let datePart = dateStr.toString().trim();
+        if (datePart.includes('T')) {
+            datePart = datePart.split('T')[0];
+        } else if (datePart.includes(' ')) {
+            datePart = datePart.split(' ')[0];
+        }
+        if (datePart.includes('-')) {
+            const parts = datePart.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+        }
+        return datePart;
+    };
+
+    const formatT = (tVal) => {
+        if (tVal === undefined || tVal === null || tVal === '') return '';
+        const tStr = tVal.toString().trim();
+        
+        // Se já vier com dois pontos (ex: "07:05" ou "07:05:00" do Service Layer)
+        if (tStr.includes(':')) {
+            const parts = tStr.split(':');
+            const h = parts[0].padStart(2, '0');
+            const m = parts[1].padStart(2, '0');
+            return `${h}:${m}`;
+        }
+        
+        // Se for inteiro (ex: 705 ou 1312)
+        let val = parseInt(tStr);
+        if (isNaN(val)) return '';
+        let hours = Math.floor(val / 100);
+        let minutes = val % 100;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    };
+
+    const dateVal = b.timestamp || b.time;
+    if (!dateVal) return '---';
+
+    if (b.createTime !== undefined && b.createTime !== null && b.createTime !== '') {
+        const dStr = formatD(dateVal);
+        const tStr = formatT(b.createTime);
+        return tStr ? `${dStr} ${tStr}` : dStr;
+    }
+
+    const dateStr = dateVal.toString();
+    if (dateStr.includes('T') && !dateStr.includes('T00:00:00')) {
+        const dateObj = new Date(dateStr);
+        if (!isNaN(dateObj)) {
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const hours = dateObj.getHours().toString().padStart(2, '0');
+            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+    }
+
+    return formatD(dateVal);
+}
+
 export function mapElements() {
     this.el = {
         mainContainer: document.getElementById('main-app-container'),
@@ -477,12 +540,49 @@ export function openPalletDetails(id) {
     document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
     document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
-    document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => {
-        const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : '---';
-        const weightStr = typeof b.weight === 'number' ? `${b.weight.toFixed(2)} kg` : '---';
-        return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td"><strong class="sancay-value">${weightStr}</strong></td></tr>`;
-    }).join('');
-    this.el.palletModal.classList.add('is-active');
+
+    const renderList = () => {
+        document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => {
+            const timeStr = formatBoxDateTime(b);
+            const weightStr = typeof b.weight === 'number' ? `${b.weight.toFixed(2)} kg` : '---';
+            return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td"><strong class="sancay-value">${weightStr}</strong></td></tr>`;
+        }).join('');
+    };
+
+    // Buscar as caixas na API getPallet para obter dados reais de pesos e datas/horas do SAP
+    document.getElementById('bs-loading').classList.remove('is-hidden');
+    fetch('http://192.168.30.14:9908/api/v1/getPallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "U_SPS_PalletCode": p.id })
+    })
+    .then(r => r.json())
+    .then(sapData => {
+        document.getElementById('bs-loading').classList.add('is-hidden');
+        if (sapData && sapData.SPS_PALLET_GROUP_LCollection) {
+            p.boxes = sapData.SPS_PALLET_GROUP_LCollection
+                .filter(l => l.U_SPS_Status !== 'REMOVIDO')
+                .map(l => ({
+                    lineId: l.LineId,
+                    weight: parseFloat(l.U_SPS_BoxWeight || 0),
+                    time: l.U_SPS_CreateDate,
+                    status: l.U_SPS_Status || 'EMPESAGEM',
+                    timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
+                    createTime: l.U_SPS_CreateTime
+                }));
+            p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
+            document.getElementById('modal-boxes').textContent = p.boxes.length;
+            document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+        }
+        renderList();
+        this.el.palletModal.classList.add('is-active');
+    })
+    .catch(err => {
+        console.error('Erro ao buscar caixas do pallet:', err);
+        document.getElementById('bs-loading').classList.add('is-hidden');
+        renderList();
+        this.el.palletModal.classList.add('is-active');
+    });
 }
 
 export function updateStats() {

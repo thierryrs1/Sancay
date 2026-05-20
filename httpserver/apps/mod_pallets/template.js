@@ -210,7 +210,7 @@ export function getPortalTemplate(t) {
                                 <thead>
                                     <tr>
                                         <th class="sancay-th">#</th>
-                                        <th class="sancay-th">${t('Hora')}</th>
+                                        <th class="sancay-th">${t('Data/Hora')}</th>
                                         <th class="sancay-th">${t('Peso')}</th>
                                     </tr>
                                 </thead>
@@ -348,7 +348,7 @@ export function getPortalTemplate(t) {
                         <thead>
                             <tr>
                                 <th class="sancay-th">${t('SEQ')}</th>
-                                <th class="sancay-th">${t('Hora')}</th>
+                                <th class="sancay-th">${t('Data/Hora')}</th>
                                 <th class="sancay-th">${t('Peso')}</th>
                             </tr>
                         </thead>

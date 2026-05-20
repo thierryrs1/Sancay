@@ -1,4 +1,5 @@
 import { getData, serviceLayerPost, serviceLayerGet } from './api.js';
+import { formatBoxDateTime } from './interface.js';
 
 export function fetchPendingPallets() {
     const _this = this;
@@ -271,6 +272,9 @@ export async function registerBox() {
     try {
         document.getElementById('bs-loading').classList.remove('is-hidden');
 
+        const now = new Date();
+        const createTime = now.getHours() * 100 + now.getMinutes();
+
         const boxNum = this.currentPallet.boxes.length;
         const updatePayload = {
             "DocEntry": this.currentPallet.docEntry,
@@ -287,7 +291,8 @@ export async function registerBox() {
                     "U_SPS_BoxWeight": weight,
                     "U_SPS_BoxQRCode": `CX-${Date.now()}`,
                     "U_SPS_Status": "EMPESAGEM",
-                    "U_SPS_CreateDate": new Date().toISOString().split('T')[0],
+                    "U_SPS_CreateDate": now.toISOString().split('T')[0],
+                    "U_SPS_CreateTime": createTime,
                     "U_SPS_CreateUser": "manager",
                     "U_SPS_Printed": "N"
                 }
@@ -531,7 +536,8 @@ export async function openActivePallet(id) {
                         time: l.U_SPS_CreateDate,
                         code: l.U_SPS_BoxCode,
                         status: l.U_SPS_Status || 'EMPESAGEM',
-                        timestamp: l.U_SPS_CreateDate || new Date().toISOString()
+                        timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
+                        createTime: l.U_SPS_CreateTime
                     }));
 
                 p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
@@ -560,7 +566,7 @@ export function printPallet(p) {
     document.getElementById('print-boxes').textContent = p.boxes.length;
     document.getElementById('print-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
     document.getElementById('print-items-list').innerHTML = p.boxes.map((b, i) => {
-        const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : '---';
+        const timeStr = formatBoxDateTime(b);
         const weightStr = typeof b.weight === 'number' ? b.weight.toFixed(2) : '---';
         return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td">${weightStr}</td></tr>`;
     }).join('');
