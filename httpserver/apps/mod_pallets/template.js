@@ -176,7 +176,7 @@ export function getPortalTemplate(t) {
                                 </div>
                                 <div class="action-buttons">
                                     <button id="close-pallet-btn" class="btn success large">${t('Encerrar Pallet')}</button>
-                                    <button id="pause-production-btn" class="btn outline">${t('Pausar Produção')}</button>
+                                    <button id="pause-production-btn" class="btn warning large">${t('Pausar Produção')}</button>
                                 </div>
                             </div>
                         </div>

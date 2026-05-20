@@ -356,6 +356,17 @@ button {
     background: var(--danger-hover) !important;
 }
 
+.btn.warning {
+    background: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2) !important;
+}
+
+.btn.warning:hover {
+    background: #d97706 !important;
+    transform: translateY(-1px) !important;
+}
+
 .btn.outline {
     background: transparent !important;
     border: 2px solid var(--border-color) !important;
@@ -717,7 +728,17 @@ tr:hover td {
     display: grid !important;
     grid-template-columns: 1.2fr 1fr !important;
     gap: 1rem !important; /* Reduced gap */
-    align-items: start !important;
+    align-items: stretch !important;
+}
+
+.scale-section {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+}
+
+.scale-section .production-summary {
+    margin-top: auto !important;
 }
 
 .scale-display {
@@ -855,6 +876,11 @@ tr:hover td {
     display: flex !important;
     flex-direction: column !important;
     gap: 1rem !important; /* Reduced from 1.5rem */
+    height: 100% !important;
+}
+
+.control-section .action-buttons {
+    margin-top: auto !important;
 }
 
 .current-info-card {
