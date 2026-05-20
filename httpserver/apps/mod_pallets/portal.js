@@ -135,15 +135,6 @@ export class SancayPortal {
         this.updateStats();
         this.fetchPendingPallets();
         this.fetchClosedPallets();
-
-        // Chamada de teste no endpoint WorkorderPos
-        serviceLayerGet('/odata4/v1/WorkorderPos', {}, (err, result) => {
-            if (err) {
-                console.error('Erro no GET de WorkorderPos:', err);
-            } else {
-                console.log('GET WorkorderPos - Resultado:', JSON.stringify(result));
-            }
-        });
     }
 
     loadLanguageScript(url) {

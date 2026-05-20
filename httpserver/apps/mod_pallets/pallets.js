@@ -10,14 +10,12 @@ export function fetchPendingPallets() {
 
         const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
 
-        // Buscar ordens de produção da Service Layer para ver quais estão Closed
-        serviceLayerGet('/odata4/v1/WorkorderPos', {}, (errWo, woData) => {
-            let closedOPs = new Set();
+        // Buscar ordens de produção da Service Layer para ver quais estão abertas (Closed eq false)
+        serviceLayerGet('/odata4/v1/WorkorderPos?$filter=Closed eq false', {}, (errWo, woData) => {
+            let openOPs = new Set();
             if (!errWo && woData && Array.isArray(woData.value)) {
                 woData.value.forEach(item => {
-                    if (item.Closed === true) {
-                        closedOPs.add(`${item.DocEntry}/${item.LineNumber}`.replace(/\s+/g, ''));
-                    }
+                    openOPs.add(`${item.DocEntry}/${item.LineNumber}`.replace(/\s+/g, ''));
                 });
             } else if (errWo) {
                 console.error('Erro ao buscar ordens de produção da Service Layer:', errWo);
@@ -47,11 +45,12 @@ export function fetchPendingPallets() {
                 };
             });
 
-            // Filtrar os que possuem OP fechada (Closed === true)
+            // Filtrar os que possuem OP aberta (se a lista falhar por erro de rede, mantém todos por segurança)
             const filteredPallets = mappedPallets.filter(pallet => {
                 if (!pallet.op) return true;
                 const cleanOP = pallet.op.toString().replace(/\s+/g, '');
-                return !closedOPs.has(cleanOP);
+                if (errWo) return true; // Falha segura: mostra tudo se a API de OPs cair
+                return openOPs.has(cleanOP);
             });
 
             // Buscar o itemCode de forma dinâmica para cada pallet
@@ -204,10 +203,11 @@ export function updateProcessView() {
     document.getElementById('current-pallet-op').textContent = `${this._t('OP')}: ${this.currentPallet.op} | ${this.currentPallet.material}`;
 
     const currentCount = this.currentPallet.boxes.length;
+    const totalWeight = this.currentPallet.boxes.reduce((s, b) => s + (parseFloat(b.weight) || 0), 0);
     const expected = this.currentPallet.expectedQty || 0;
-    const progressPercent = expected > 0 ? Math.min((currentCount / expected) * 100, 100) : 0;
+    const progressPercent = expected > 0 ? Math.min((totalWeight / expected) * 100, 100) : 0;
 
-    document.getElementById('current-box-count').textContent = `${currentCount} / ${expected}`;
+    document.getElementById('current-box-count').textContent = `${totalWeight.toFixed(2)} kg / ${expected.toFixed(2)} kg (${progressPercent.toFixed(1)}%)`;
     if (this.el.progressBar) {
         this.el.progressBar.style.width = `${progressPercent}%`;
     }
