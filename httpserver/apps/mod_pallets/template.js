@@ -315,8 +315,8 @@ export function getPortalTemplate(t) {
                     <div class="modal-footer" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; width: 100%;">
                         <select id="print-language" class="sancay-input" style="width: 140px; margin-right: auto; margin-bottom: 0;">
                             <option value="PTB">Português</option>
-                            <option value="EN">Inglês</option>
-                            <option value="ES">Espanhol</option>
+                            <option value="EN">English</option>
+                            <option value="ES">Español</option>
                         </select>
                         <button id="edit-pallet-btn" class="btn primary">${t('Continuar Pallet')}</button>
                         <button id="print-pallet-btn" class="btn outline">${t('Imprimir Etiqueta')}</button>
