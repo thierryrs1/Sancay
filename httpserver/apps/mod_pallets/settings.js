@@ -37,28 +37,68 @@ export function loadUserSettings() {
     });
 }
 
+export function loadEquipList() {
+    getData('getAux', 'getListaEquip', '', (err, res) => {
+        if (err) {
+            console.error('Erro ao carregar lista de equipamentos:', err);
+            return;
+        }
+
+        let data = [];
+        if (res && res.value && Array.isArray(res.value)) {
+            data = res.value;
+        } else if (Array.isArray(res)) {
+            data = res;
+        }
+        
+        let scalesHtml = `<option value="">${this._t('Selecione a Balança...')}</option>`;
+        let printersHtml = `<option value="">${this._t('Selecione a Impressora...')}</option>`;
+        let labelsHtml = `<option value="">${this._t('Selecione o Modelo...')}</option>`;
+        
+        data.forEach(item => {
+            const isArray = Array.isArray(item);
+            // Pega pelo nome da coluna ou pela posição para ser à prova de falhas
+            let tipo = isArray ? item[0] : (item.Tipo || item.tipo || item.TIPO || Object.values(item)[0]);
+            let desc = isArray ? item[1] : (item.Descricao || item.descricao || item.DESCRICAO || Object.values(item)[1]);
+            
+            if (!tipo || !desc) return;
+            
+            const option = `<option value="${desc}">${desc}</option>`;
+            const t = tipo.toString().toUpperCase();
+            
+            if (t === 'SCALE') {
+                scalesHtml += option;
+            } else if (t === 'PRINTER') {
+                printersHtml += option;
+            } else if (t === 'LABEL') {
+                labelsHtml += option;
+            }
+        });
+        
+        if (this.el.settingScale) this.el.settingScale.innerHTML = scalesHtml;
+        if (this.el.settingPrinter) this.el.settingPrinter.innerHTML = printersHtml;
+        if (this.el.settingLabel) this.el.settingLabel.innerHTML = labelsHtml;
+        
+        // Como o carregamento da lista e das configurações do usuário são assíncronos,
+        // garantimos que, se o userSettings já carregou, aplicamos ele agora.
+        this.updateSettingsUI();
+    });
+}
+
 export function updateSettingsUI() {
     if (!this.userSettings) return;
     
-    // Aqui assumimos que as opções do dropdown ainda vão vir por outra API (conforme o user informou).
-    // Por enquanto, apenas inserimos a opção padrão carregada para que apareça selecionada.
-    
-    if (this.el.settingScale) {
-        if (this.userSettings.scale) {
-            this.el.settingScale.innerHTML = `<option value="${this.userSettings.scale}">${this.userSettings.scale}</option>`;
-        }
+    // Agora só setamos o "value", pois as options () já foram (ou serão) carregadas pelo loadEquipList
+    if (this.el.settingScale && this.userSettings.scale) {
+        this.el.settingScale.value = this.userSettings.scale;
     }
     
-    if (this.el.settingPrinter) {
-        if (this.userSettings.printer) {
-            this.el.settingPrinter.innerHTML = `<option value="${this.userSettings.printer}">${this.userSettings.printer}</option>`;
-        }
+    if (this.el.settingPrinter && this.userSettings.printer) {
+        this.el.settingPrinter.value = this.userSettings.printer;
     }
     
-    if (this.el.settingLabel) {
-        if (this.userSettings.label) {
-            this.el.settingLabel.innerHTML = `<option value="${this.userSettings.label}">${this.userSettings.label}</option>`;
-        }
+    if (this.el.settingLabel && this.userSettings.label) {
+        this.el.settingLabel.value = this.userSettings.label;
     }
 }
 

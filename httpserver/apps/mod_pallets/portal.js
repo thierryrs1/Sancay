@@ -55,6 +55,7 @@ import {
 
 import {
     loadUserSettings,
+    loadEquipList,
     updateSettingsUI,
     saveUserSettings
 } from './settings.js';
@@ -152,6 +153,7 @@ export class SancayPortal {
         this.bindEvents();
         this.startScaleSimulation();
         
+        this.loadEquipList();
         this.loadUserSettings();
 
         this.fetchProductionOrders();
@@ -222,6 +224,7 @@ Object.assign(SancayPortal.prototype, {
 
     // Settings Operations
     loadUserSettings,
+    loadEquipList,
     updateSettingsUI,
     saveUserSettings,
 
