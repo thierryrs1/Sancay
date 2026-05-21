@@ -553,6 +553,9 @@ export async function openActivePallet(id) {
         console.error('Erro ao buscar detalhes do pallet:', err);
         document.getElementById('bs-loading').classList.add('is-hidden');
         this.startProcess(p);
+    }
+}
+
 export function printCurrentViewedPallet() {
     const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === this.viewedPalletId)) || this.pallets.find(p => p.id === this.viewedPalletId);
     if (p) this.printPallet(p);
@@ -579,44 +582,11 @@ export async function printPallet(p) {
             return;
         }
 
-        let labelData = [];
-        if (res && res.value && Array.isArray(res.value)) {
-            labelData = res.value; // Os dados já vêm da API formatados no padrão esperado
-        } else if (Array.isArray(res)) {
-            labelData = res;
-        }
-
-        const printPayload = {
-            printerCode: this.userSettings.printer,
-            labelCode: this.userSettings.label,
-            labelData: labelData
-        };
-
-        // Colocando o payload exato no console antes de chamar a API
-        console.log(JSON.stringify(printPayload.labelData));
-
-        try {
-            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
-            const response = await fetch('http://190.128.212.242:9906/print/labels', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(printPayload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro API: ${response.status}`);
-            }
-            
-            this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
-        } catch (printErr) {
-            console.error('Erro ao imprimir etiqueta:', printErr);
-            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
-        } finally {
-            document.getElementById('bs-loading').classList.add('is-hidden');
-        }
+        // Apenas imprimindo o retorno bruto no console para analisarmos o formato e montarmos juntos
+        console.log("DADOS BRUTOS DO BEAS (res):", res);
+        
+        // Removemos o loading após receber do Beas
+        document.getElementById('bs-loading').classList.add('is-hidden');
     });
 }
 
