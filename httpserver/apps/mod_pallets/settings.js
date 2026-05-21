@@ -92,18 +92,31 @@ export function loadEquipList() {
 export function updateSettingsUI() {
     if (!this.userSettings) return;
     
-    // Agora só setamos o "value", pois as options () já foram (ou serão) carregadas pelo loadEquipList
-    if (this.el.settingScale && this.userSettings.scale) {
-        this.el.settingScale.value = this.userSettings.scale;
-    }
-    
-    if (this.el.settingPrinter && this.userSettings.printer) {
-        this.el.settingPrinter.value = this.userSettings.printer;
-    }
-    
-    if (this.el.settingLabel && this.userSettings.label) {
-        this.el.settingLabel.value = this.userSettings.label;
-    }
+    const ensureOption = (selectEl, val) => {
+        if (!selectEl || !val) return;
+        
+        let exists = false;
+        for (let i = 0; i < selectEl.options.length; i++) {
+            if (selectEl.options[i].value === val) {
+                exists = true;
+                break;
+            }
+        }
+        
+        // Se a opção salva no banco não estiver na lista de equipamentos, adiciona ela dinamicamente
+        if (!exists) {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.text = val;
+            selectEl.appendChild(opt);
+        }
+        
+        selectEl.value = val;
+    };
+
+    ensureOption(this.el.settingScale, this.userSettings.scale);
+    ensureOption(this.el.settingPrinter, this.userSettings.printer);
+    ensureOption(this.el.settingLabel, this.userSettings.label);
 }
 
 export function saveUserSettings() {
