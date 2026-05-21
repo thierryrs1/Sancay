@@ -17,6 +17,10 @@ export function getPortalTemplate(t) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span>${t('Histórico')}</span>
                         </li>
+                        <li data-view="settings" title="${t('Configurações')}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span>${t('Configurações')}</span>
+                        </li>
                     </ul>
                 </nav>
             </aside>
@@ -238,6 +242,36 @@ export function getPortalTemplate(t) {
                                     <button id="close-pallet-btn" class="btn success large">${t('Encerrar Pallet')}</button>
                                     <button id="pause-production-btn" class="btn warning large">${t('Pausar Produção')}</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings View -->
+                    <div id="settings" class="view">
+                        <div class="section-header">
+                            <h2>${t('Configurações do Colaborador')}</h2>
+                        </div>
+                        <div class="form-container" style="max-width: 600px; margin-top: 1rem;">
+                            <div class="form-group">
+                                <label for="setting-scale">${t('Balança Padrão')}</label>
+                                <select id="setting-scale" class="sancay-input">
+                                    <option value="">${t('Carregando...')}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-printer">${t('Impressora Padrão')}</label>
+                                <select id="setting-printer" class="sancay-input">
+                                    <option value="">${t('Carregando...')}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-label">${t('Modelo de Etiqueta Padrão')}</label>
+                                <select id="setting-label" class="sancay-input">
+                                    <option value="">${t('Carregando...')}</option>
+                                </select>
+                            </div>
+                            <div style="margin-top: 2rem;">
+                                <button id="save-settings-btn" class="btn primary">${t('Salvar Configurações')}</button>
                             </div>
                         </div>
                     </div>

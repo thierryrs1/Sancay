@@ -119,7 +119,11 @@ export function mapElements() {
         cancelScaleAuthBtn: document.getElementById('cancel-scale-auth-btn'),
         confirmScaleAuthBtn: document.getElementById('confirm-scale-auth-btn'),
         scaleAuthUser: document.getElementById('scale-auth-user'),
-        scaleAuthPass: document.getElementById('scale-auth-pass')
+        scaleAuthPass: document.getElementById('scale-auth-pass'),
+        settingScale: document.getElementById('setting-scale'),
+        settingPrinter: document.getElementById('setting-printer'),
+        settingLabel: document.getElementById('setting-label'),
+        saveSettingsBtn: document.getElementById('save-settings-btn')
     };
 }
 
@@ -168,6 +172,14 @@ export function bindEvents() {
     this.el.registerBoxBtn.addEventListener('click', () => this.registerBox());
     this.el.closePalletBtn.addEventListener('click', () => this.closePallet());
     this.el.pauseProductionBtn.addEventListener('click', () => this.pauseProduction());
+
+    if (this.el.saveSettingsBtn) {
+        this.el.saveSettingsBtn.addEventListener('click', () => {
+            if (typeof this.saveUserSettings === 'function') {
+                this.saveUserSettings();
+            }
+        });
+    }
 
     if (this.el.refreshPalletsBtn) {
         this.el.refreshPalletsBtn.addEventListener('click', () => {

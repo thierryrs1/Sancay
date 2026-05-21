@@ -35,7 +35,6 @@ import {
     closeHistoryFilter
 } from './interface.js';
 
-// Import Pallet functions
 import {
     fetchPendingPallets,
     fetchProductionOrders,
@@ -53,6 +52,12 @@ import {
     reopenPallet,
     fetchClosedPallets
 } from './pallets.js';
+
+import {
+    loadUserSettings,
+    updateSettingsUI,
+    saveUserSettings
+} from './settings.js';
 
 const BASE_URL = new URL('.', import.meta.url).href;
 
@@ -146,6 +151,8 @@ export class SancayPortal {
 
         this.bindEvents();
         this.startScaleSimulation();
+        
+        this.loadUserSettings();
 
         this.fetchProductionOrders();
 
@@ -212,6 +219,11 @@ Object.assign(SancayPortal.prototype, {
     selectAllHistoryFilter,
     applyHistoryFilter,
     closeHistoryFilter,
+
+    // Settings Operations
+    loadUserSettings,
+    updateSettingsUI,
+    saveUserSettings,
 
     // Pallet Core Operations
     fetchPendingPallets,
