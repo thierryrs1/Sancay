@@ -10,12 +10,14 @@ export function loadUserSettings() {
         label: ''
     };
 
-    getData('getAux', 'getPrefColab', uid, (err, res) => {
+    getData('getAux', 'getPrefColab&dg_limit=1000', uid, (err, res) => {
         if (err) {
             console.error('Erro ao carregar configurações do colaborador:', err);
             return;
         }
 
+        console.log('Raw User Settings:', res);
+        
         let data = [];
         if (res && res.value && Array.isArray(res.value)) {
             data = res.value;
@@ -24,13 +26,16 @@ export function loadUserSettings() {
         }
         
         if (data.length > 0) {
-            // Verifica formato: row pode ser array [scale, printer, label] ou objeto
-            const row = Array.isArray(data[0]) ? data[0] : Object.values(data[0]);
+            const row = data[0];
+            const isArr = Array.isArray(row);
+            
             this.userSettings = {
-                scale: row[0] || '',
-                printer: row[1] || '',
-                label: row[2] || ''
+                // Tenta pegar pelo nome exato, ou minúsculo, ou pelo array/ordem do objeto
+                scale: isArr ? row[0] : (row.U_SPS_Default_Scale || row.u_sps_default_scale || Object.values(row)[0] || ''),
+                printer: isArr ? row[1] : (row.U_SPS_Default_Printer || row.u_sps_default_printer || Object.values(row)[1] || ''),
+                label: isArr ? row[2] : (row.U_SPS_Default_Label || row.u_sps_default_label || Object.values(row)[2] || '')
             };
+            console.log('Parsed User Settings:', this.userSettings);
         }
         
         this.updateSettingsUI();
@@ -38,11 +43,13 @@ export function loadUserSettings() {
 }
 
 export function loadEquipList() {
-    getData('getAux', 'getListaEquip', '', (err, res) => {
+    getData('getAux', 'getListaEquip&dg_limit=1000', '', (err, res) => {
         if (err) {
             console.error('Erro ao carregar lista de equipamentos:', err);
             return;
         }
+        
+        console.log('Raw Equip List:', res);
 
         let data = [];
         if (res && res.value && Array.isArray(res.value)) {
@@ -57,14 +64,13 @@ export function loadEquipList() {
         
         data.forEach(item => {
             const isArray = Array.isArray(item);
-            // Pega pelo nome da coluna ou pela posição para ser à prova de falhas
             let tipo = isArray ? item[0] : (item.Tipo || item.tipo || item.TIPO || Object.values(item)[0]);
             let desc = isArray ? item[1] : (item.Descricao || item.descricao || item.DESCRICAO || Object.values(item)[1]);
             
             if (!tipo || !desc) return;
             
             const option = `<option value="${desc}">${desc}</option>`;
-            const t = tipo.toString().toUpperCase();
+            const t = tipo.toString().toUpperCase().trim();
             
             if (t === 'SCALE') {
                 scalesHtml += option;
@@ -79,8 +85,6 @@ export function loadEquipList() {
         if (this.el.settingPrinter) this.el.settingPrinter.innerHTML = printersHtml;
         if (this.el.settingLabel) this.el.settingLabel.innerHTML = labelsHtml;
         
-        // Como o carregamento da lista e das configurações do usuário são assíncronos,
-        // garantimos que, se o userSettings já carregou, aplicamos ele agora.
         this.updateSettingsUI();
     });
 }
