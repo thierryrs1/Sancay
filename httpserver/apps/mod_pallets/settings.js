@@ -15,8 +15,6 @@ export function loadUserSettings() {
             console.error('Erro ao carregar configurações do colaborador:', err);
             return;
         }
-
-        console.log('Raw User Settings:', res);
         
         let data = [];
         if (res && res.value && Array.isArray(res.value)) {
@@ -35,7 +33,7 @@ export function loadUserSettings() {
                 printer: isArr ? row[1] : (row.U_SPS_Default_Printer || row.u_sps_default_printer || Object.values(row)[1] || ''),
                 label: isArr ? row[2] : (row.U_SPS_Default_Label || row.u_sps_default_label || Object.values(row)[2] || '')
             };
-            console.log('Parsed User Settings:', this.userSettings);
+
         }
         
         this.updateSettingsUI();
@@ -48,8 +46,6 @@ export function loadEquipList() {
             console.error('Erro ao carregar lista de equipamentos:', err);
             return;
         }
-        
-        console.log('Raw Equip List:', res);
 
         let data = [];
         if (res && res.value && Array.isArray(res.value)) {
