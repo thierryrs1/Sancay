@@ -66,8 +66,30 @@ export function saveUserSettings() {
     const scale = this.el.settingScale ? this.el.settingScale.value : '';
     const printer = this.el.settingPrinter ? this.el.settingPrinter.value : '';
     const label = this.el.settingLabel ? this.el.settingLabel.value : '';
+    const uid = window.appInfo && window.appInfo.uid ? window.appInfo.uid.toString() : '1';
     
-    // TODO: A lógica de salvar os dados na @SPS_PREF_COLAB será feita assim que o endpoint de update estiver pronto
-    this.userSettings = { scale, printer, label };
-    this.showToast(this._t('Configurações salvas (visualmente por enquanto)!'));
+    const payload = [{
+        "U_SPS_Default_Label": label,
+        "U_SPS_Default_Printer": printer,
+        "U_SPS_Default_Scale": scale,
+        "U_SPS_Pers_ID": uid
+    }];
+    
+    const payloadData = JSON.stringify(payload);
+    
+    // Mostra loading
+    const loader = document.getElementById('bs-loading');
+    if (loader) loader.classList.remove('is-hidden');
+    
+    getData('postAux', 'postPrefColab', payloadData, (err, res) => {
+        if (loader) loader.classList.add('is-hidden');
+        if (err) {
+            console.error('Erro ao salvar configurações do colaborador:', err);
+            this.showToast(this._t('Erro ao salvar as configurações.'));
+            return;
+        }
+
+        this.userSettings = { scale, printer, label };
+        this.showToast(this._t('Configurações salvas com sucesso!'));
+    });
 }
