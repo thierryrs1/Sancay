@@ -1,0 +1,5 @@
+﻿// DataWindow loaded
+// Created 21.05.2026 14:54:29 from jsilva, Station fsartorinew
+global function dw_1_load
+dw_1.item.menge_je_t.formatstring=text=KG/Min,
+end global

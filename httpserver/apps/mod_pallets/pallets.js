@@ -553,9 +553,6 @@ export async function openActivePallet(id) {
         console.error('Erro ao buscar detalhes do pallet:', err);
         document.getElementById('bs-loading').classList.add('is-hidden');
         this.startProcess(p);
-    }
-}
-
 export function printCurrentViewedPallet() {
     const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === this.viewedPalletId)) || this.pallets.find(p => p.id === this.viewedPalletId);
     if (p) this.printPallet(p);
@@ -567,52 +564,60 @@ export async function printPallet(p) {
         return;
     }
 
-    const printPayload = {
-        printerCode: this.userSettings.printer,
-        labelCode: this.userSettings.label,
-        labelData: [
-            {
-              ItemCode: "CCRO001",
-              ItemName: 'COURO CRU - COLAGENO',
-              CardName: 'FUGA S/A',
-              ExpDate: '26/08/2027',
-              ReceiveDate: '26/08/2025',
-              DocumentNumber: '71032',
-              NetWeight: '973,800',
-              GrossWeight: '1.023,800',
-              Tare: '50,000',
-              PackName: 'SACO'
-            }
-        ]
-    };
+    const langSelect = document.getElementById('print-language');
+    const lang = langSelect ? langSelect.value : 'PTB';
+    const params = `@${p.id}@@${lang}@`;
 
     document.getElementById('bs-loading').classList.remove('is-hidden');
-    
-    try {
 
-        console.log(JSON.stringify(printPayload))
-
-        const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
-        const response = await fetch('http://190.128.212.242:9906/print/labels', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(printPayload)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erro API: ${response.status}`);
+    // Busca os dados da etiqueta chamando a procedure no Beas
+    getData('getAux', 'getEtiquetaPallet', params, async (err, res) => {
+        if (err) {
+            document.getElementById('bs-loading').classList.add('is-hidden');
+            console.error('Erro ao buscar dados da etiqueta no SAP:', err);
+            this.showToast(this._t('Erro ao buscar dados da etiqueta no banco.'));
+            return;
         }
-        
-        this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
-    } catch (err) {
-        console.error('Erro ao imprimir etiqueta:', err);
-        this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
-    } finally {
-        document.getElementById('bs-loading').classList.add('is-hidden');
-    }
+
+        let labelData = [];
+        if (res && res.value && Array.isArray(res.value)) {
+            labelData = res.value; // Os dados já vêm da API formatados no padrão esperado
+        } else if (Array.isArray(res)) {
+            labelData = res;
+        }
+
+        const printPayload = {
+            printerCode: this.userSettings.printer,
+            labelCode: this.userSettings.label,
+            labelData: labelData
+        };
+
+        // Colocando o payload exato no console antes de chamar a API
+        console.log(JSON.stringify(printPayload.labelData));
+
+        try {
+            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
+            const response = await fetch('http://190.128.212.242:9906/print/labels', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(printPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro API: ${response.status}`);
+            }
+            
+            this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
+        } catch (printErr) {
+            console.error('Erro ao imprimir etiqueta:', printErr);
+            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+        } finally {
+            document.getElementById('bs-loading').classList.add('is-hidden');
+        }
+    });
 }
 
 export function deleteBox(idx) {
