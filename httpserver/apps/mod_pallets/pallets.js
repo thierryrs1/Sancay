@@ -589,9 +589,16 @@ export async function printPallet(p) {
     document.getElementById('bs-loading').classList.remove('is-hidden');
     
     try {
-        const response = await fetch('http://192.168.30.14:9906/print/labels', {
+
+        console.log(JSON.stringify(printPayload))
+
+        const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
+        const response = await fetch('http://190.128.212.242:9906/print/labels', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(printPayload)
         });
 
