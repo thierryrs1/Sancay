@@ -582,11 +582,54 @@ export async function printPallet(p) {
             return;
         }
 
-        // Apenas imprimindo o retorno bruto no console para analisarmos o formato e montarmos juntos
-        console.log("DADOS BRUTOS DO BEAS (res):", res);
-        
-        // Removemos o loading após receber do Beas
-        document.getElementById('bs-loading').classList.add('is-hidden');
+        if (!res || !res.value || !res.value[0]) {
+            console.error('Retorno inválido do SAP:', res);
+            this.showToast(this._t('Erro: Dados da etiqueta em branco ou inválidos.'));
+            document.getElementById('bs-loading').classList.add('is-hidden');
+            return;
+        }
+
+        const rawRow = res.value[0];
+        const formattedLabel = {
+            PalletCode: rawRow[0] || '',
+            Tipo: rawRow[1] || '',
+            TotalAmount: rawRow[2] || '',
+            NetWeight: rawRow[3] || '',
+            PackingList: rawRow[4] || '',
+            QrCode: rawRow[5] || '',
+            Resume: rawRow[6] || ''
+        };
+
+        const printPayload = {
+            printerCode: this.userSettings.printer,
+            labelCode: this.userSettings.label,
+            labelData: [formattedLabel]
+        };
+
+        console.log("Payload Montado para API:", JSON.stringify(printPayload));
+
+        try {
+            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
+            const response = await fetch('http://190.128.212.242:9906/print/labels', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(printPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro API: ${response.status}`);
+            }
+            
+            this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
+        } catch (printErr) {
+            console.error('Erro ao imprimir etiqueta:', printErr);
+            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+        } finally {
+            document.getElementById('bs-loading').classList.add('is-hidden');
+        }
     });
 }
 
