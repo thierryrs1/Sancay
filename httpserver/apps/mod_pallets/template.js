@@ -314,7 +314,7 @@ export function getPortalTemplate(t) {
                     </div>
                     <div class="modal-footer">
                         <button id="edit-pallet-btn" class="btn primary">${t('Continuar Pallet')}</button>
-                        <button id="print-pallet-btn" class="btn outline">${t('Imprimir Relatório')}</button>
+                        <button id="print-pallet-btn" class="btn outline">${t('Imprimir Etiqueta')}</button>
                     </div>
                 </div>
             </div>

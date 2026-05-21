@@ -561,19 +561,51 @@ export function printCurrentViewedPallet() {
     if (p) this.printPallet(p);
 }
 
-export function printPallet(p) {
-    document.getElementById('print-id').textContent = p.id;
-    document.getElementById('print-op').textContent = p.op;
-    document.getElementById('print-material').textContent = p.material;
-    document.getElementById('print-date').textContent = new Date(p.endTime || p.startTime).toLocaleString();
-    document.getElementById('print-boxes').textContent = p.boxes.length;
-    document.getElementById('print-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
-    document.getElementById('print-items-list').innerHTML = p.boxes.map((b, i) => {
-        const timeStr = formatBoxDateTime(b);
-        const weightStr = typeof b.weight === 'number' ? b.weight.toFixed(2) : '---';
-        return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td">${weightStr}</td></tr>`;
-    }).join('');
-    window.print();
+export async function printPallet(p) {
+    if (!this.userSettings || !this.userSettings.printer || !this.userSettings.label) {
+        this.showToast(this._t('Atenção: Configure a impressora e modelo de etiqueta na aba Configurações primeiro!'));
+        return;
+    }
+
+    const printPayload = {
+        printerCode: this.userSettings.printer,
+        labelCode: this.userSettings.label,
+        labelData: [
+            {
+              ItemCode: "CCRO001",
+              ItemName: 'COURO CRU - COLAGENO',
+              CardName: 'FUGA S/A',
+              ExpDate: '26/08/2027',
+              ReceiveDate: '26/08/2025',
+              DocumentNumber: '71032',
+              NetWeight: '973,800',
+              GrossWeight: '1.023,800',
+              Tare: '50,000',
+              PackName: 'SACO'
+            }
+        ]
+    };
+
+    document.getElementById('bs-loading').classList.remove('is-hidden');
+    
+    try {
+        const response = await fetch('http://192.168.30.14:9906/print/labels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(printPayload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro API: ${response.status}`);
+        }
+        
+        this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
+    } catch (err) {
+        console.error('Erro ao imprimir etiqueta:', err);
+        this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+    } finally {
+        document.getElementById('bs-loading').classList.add('is-hidden');
+    }
 }
 
 export function deleteBox(idx) {
