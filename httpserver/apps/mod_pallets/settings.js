@@ -7,7 +7,8 @@ export function loadUserSettings() {
     this.userSettings = {
         scale: '',
         printer: '',
-        label: ''
+        label: '',
+        language: 'PTB'
     };
 
     getData('getAux', 'getPrefColab&dg_limit=1000', uid, (err, res) => {
@@ -31,7 +32,8 @@ export function loadUserSettings() {
                 // Tenta pegar pelo nome exato, ou minúsculo, ou pelo array/ordem do objeto
                 scale: isArr ? row[0] : (row.U_SPS_Default_Scale || row.u_sps_default_scale || Object.values(row)[0] || ''),
                 printer: isArr ? row[1] : (row.U_SPS_Default_Printer || row.u_sps_default_printer || Object.values(row)[1] || ''),
-                label: isArr ? row[2] : (row.U_SPS_Default_Label || row.u_sps_default_label || Object.values(row)[2] || '')
+                label: isArr ? row[2] : (row.U_SPS_Default_Label || row.u_sps_default_label || Object.values(row)[2] || ''),
+                language: isArr ? row[3] : (row.U_SPS_Default_Lang || row.u_sps_default_lang || Object.values(row)[3] || 'PTB')
             };
 
         }
@@ -113,18 +115,24 @@ export function updateSettingsUI() {
     ensureOption(this.el.settingScale, this.userSettings.scale);
     ensureOption(this.el.settingPrinter, this.userSettings.printer);
     ensureOption(this.el.settingLabel, this.userSettings.label);
+    
+    if (this.el.settingLanguage && this.userSettings.language) {
+        this.el.settingLanguage.value = this.userSettings.language;
+    }
 }
 
 export function saveUserSettings() {
     const scale = this.el.settingScale ? this.el.settingScale.value : '';
     const printer = this.el.settingPrinter ? this.el.settingPrinter.value : '';
     const label = this.el.settingLabel ? this.el.settingLabel.value : '';
+    const language = this.el.settingLanguage ? this.el.settingLanguage.value : 'PTB';
     const uid = window.appInfo && window.appInfo.uid ? window.appInfo.uid.toString() : '1';
     
     const payload = [{
         "U_SPS_Default_Label": label,
         "U_SPS_Default_Printer": printer,
         "U_SPS_Default_Scale": scale,
+        "U_SPS_Default_Lang": language,
         "U_SPS_Pers_ID": uid
     }];
     
@@ -142,7 +150,7 @@ export function saveUserSettings() {
             return;
         }
 
-        this.userSettings = { scale, printer, label };
+        this.userSettings = { scale, printer, label, language };
         this.showToast(this._t('Configurações salvas com sucesso!'));
     });
 }

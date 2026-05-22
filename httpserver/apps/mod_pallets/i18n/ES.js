@@ -77,5 +77,12 @@ window.portalTranslations = {
     "Erro ao conectar com servidor de impressão.": "Error al conectar con el servidor de impresión.",
     "Erro ao conectar com servidor de impressão via Beas.": "Error al conectar con el servidor de impresión a través de Beas.",
     "Imprimir Etiqueta": "Imprimir Etiqueta",
-    "Carregando...": "Cargando..."
+    "Carregando...": "Cargando...",
+    "Selecione a Ordem de Produção para começar": "Seleccione una Orden de Producción para empezar",
+    "Automático pela OP": "Automático por la OP",
+    "Recarregar Pallets": "Recargar Pallets",
+    "Histórico de Pallets Encerrados": "Historial de Pallets Cerrados",
+    "Filtrado": "Filtrado",
+    "Limpar Filtros": "Limpiar Filtros",
+    "ID": "ID"
 };

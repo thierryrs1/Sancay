@@ -123,6 +123,7 @@ export function mapElements() {
         settingScale: document.getElementById('setting-scale'),
         settingPrinter: document.getElementById('setting-printer'),
         settingLabel: document.getElementById('setting-label'),
+        settingLanguage: document.getElementById('setting-language'),
         saveSettingsBtn: document.getElementById('save-settings-btn')
     };
 }

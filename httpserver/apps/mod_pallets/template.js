@@ -270,6 +270,14 @@ export function getPortalTemplate(t) {
                                     <option value="">${t('Carregando...')}</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="setting-language">${t('Idioma Padrão')}</label>
+                                <select id="setting-language" class="sancay-input">
+                                    <option value="PTB">Português (Brasil)</option>
+                                    <option value="EN">English</option>
+                                    <option value="ES">Español</option>
+                                </select>
+                            </div>
                             <div style="margin-top: 2rem;">
                                 <button id="save-settings-btn" class="btn primary">${t('Salvar Configurações')}</button>
                             </div>
