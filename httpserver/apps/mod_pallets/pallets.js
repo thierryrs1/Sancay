@@ -304,6 +304,7 @@ export async function registerBox() {
             ]
         };
 
+
         const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -624,6 +625,7 @@ export async function printPallet(p) {
             labelData: [formattedLabel]
         };
 
+
         try {
             const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
             const response = await fetch('http://190.128.212.242:9906/print/labels', {
@@ -871,25 +873,5 @@ export function printBoxLabel(docEntry, lineId) {
             labelData: [formattedLabel]
         };
 
-        try {
-            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
-            const response = await fetch('http://190.128.212.242:9906/print/labels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(printPayload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro API: ${response.status}`);
-            }
-
-            this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
-        } catch (printErr) {
-            console.error('Erro ao imprimir etiqueta de caixa:', printErr);
-            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
-        }
     });
 }
