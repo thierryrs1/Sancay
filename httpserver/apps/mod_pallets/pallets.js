@@ -304,9 +304,6 @@ export async function registerBox() {
             ]
         };
 
-        // Console log para testes do Postman conforme solicitado
-        console.log("TESTE POSTMAN UPDATEPALLET:", JSON.stringify(updatePayload));
-
         const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -329,8 +326,6 @@ export async function registerBox() {
             // Tentativa de fallback, caso a API não devolva as linhas. Geralmente LineId é o tamanho atual ou índice (zero-based).
             lineId = this.currentPallet.boxes.length;
         }
-
-        console.log("Caixa salva. Retorno da API Update:", res, "LineId extraído:", lineId);
 
         // Aciona impressão da caixa
         this.printBoxLabel(this.currentPallet.docEntry, lineId);
@@ -629,8 +624,6 @@ export async function printPallet(p) {
             labelData: [formattedLabel]
         };
 
-        console.log("Payload Montado para API:", JSON.stringify(printPayload));
-
         try {
             const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
             const response = await fetch('http://190.128.212.242:9906/print/labels', {
@@ -878,13 +871,11 @@ export function printBoxLabel(docEntry, lineId) {
             labelData: [formattedLabel]
         };
 
-        console.log("Enviando PAYLOAD ETIQUETA DA CAIXA para a impressora:", JSON.stringify(printPayload));
-        
         try {
             const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
             const response = await fetch('http://190.128.212.242:9906/print/labels', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -894,7 +885,7 @@ export function printBoxLabel(docEntry, lineId) {
             if (!response.ok) {
                 throw new Error(`Erro API: ${response.status}`);
             }
-            
+
             this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
         } catch (printErr) {
             console.error('Erro ao imprimir etiqueta de caixa:', printErr);
