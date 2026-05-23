@@ -50,7 +50,8 @@ import {
     printPallet,
     deleteBox,
     reopenPallet,
-    fetchClosedPallets
+    fetchClosedPallets,
+    printBoxLabel
 } from './pallets.js';
 
 import {
@@ -243,5 +244,6 @@ Object.assign(SancayPortal.prototype, {
     printPallet,
     deleteBox,
     reopenPallet,
-    fetchClosedPallets
+    fetchClosedPallets,
+    printBoxLabel
 });

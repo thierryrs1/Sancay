@@ -285,6 +285,7 @@ export async function registerBox() {
             "U_SPS_OPCode": this.currentPallet.op,
             "U_SPS_PalletCode": this.currentPallet.id,
             "U_SPS_Status": "EM PROCESSO",
+            "U_SPS_Origem": "PRODUCTION",
             "SPS_PALLET_GROUP_LCollection": [
                 {
                     "U_SPS_OPCode": this.currentPallet.op,
@@ -292,6 +293,7 @@ export async function registerBox() {
                     "U_SPS_DistNumber": this.currentPallet.op,
                     "U_SPS_BoxCode": `CX-${Date.now()}`,
                     "U_SPS_BoxWeight": weight,
+                    "U_SPS_Tare": 0,
                     "U_SPS_BoxQRCode": `CX-${Date.now()}`,
                     "U_SPS_Status": "EMPESAGEM",
                     "U_SPS_CreateDate": now.toISOString().split('T')[0],
@@ -302,6 +304,9 @@ export async function registerBox() {
             ]
         };
 
+        // Console log para testes do Postman conforme solicitado
+        console.log("TESTE POSTMAN UPDATEPALLET:", JSON.stringify(updatePayload));
+
         const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -311,6 +316,24 @@ export async function registerBox() {
         const res = await response.json();
         document.getElementById('bs-loading').classList.add('is-hidden');
         this.showToast(this._t('Caixa registrada'));
+
+        // Pega o LineId retornado (tenta achar no retorno da API ou usa o tamanho atual do array como aproximação)
+        let lineId = '';
+        if (res && res.SPS_PALLET_GROUP_LCollection && res.SPS_PALLET_GROUP_LCollection.length > 0) {
+            const l = res.SPS_PALLET_GROUP_LCollection;
+            lineId = l[l.length - 1].LineId;
+        } else if (res && res.data && res.data.SPS_PALLET_GROUP_LCollection && res.data.SPS_PALLET_GROUP_LCollection.length > 0) {
+            const l = res.data.SPS_PALLET_GROUP_LCollection;
+            lineId = l[l.length - 1].LineId;
+        } else {
+            // Tentativa de fallback, caso a API não devolva as linhas. Geralmente LineId é o tamanho atual ou índice (zero-based).
+            lineId = this.currentPallet.boxes.length;
+        }
+
+        console.log("Caixa salva. Retorno da API Update:", res, "LineId extraído:", lineId);
+
+        // Aciona impressão da caixa
+        this.printBoxLabel(this.currentPallet.docEntry, lineId);
     } catch (err) {
         console.error('Erro ao sincronizar caixa com SAP:', err);
         document.getElementById('bs-loading').classList.add('is-hidden');
@@ -612,7 +635,7 @@ export async function printPallet(p) {
             const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
             const response = await fetch('http://190.128.212.242:9906/print/labels', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -622,7 +645,7 @@ export async function printPallet(p) {
             if (!response.ok) {
                 throw new Error(`Erro API: ${response.status}`);
             }
-            
+
             this.showToast(this._t('Etiqueta enviada para impressão com sucesso!'));
         } catch (printErr) {
             console.error('Erro ao imprimir etiqueta:', printErr);
@@ -795,5 +818,66 @@ export function fetchClosedPallets() {
             _this.sapClosedPallets = mappedPallets;
             _this.renderHistory();
         });
+    });
+}
+
+export function printBoxLabel(docEntry, lineId) {
+    if (!this.userSettings || !this.userSettings.printer) {
+        this.showToast(this._t('Atenção: Configure a impressora na aba Configurações primeiro!'));
+        return;
+    }
+
+    const lang = this.userSettings.language || 'PTB';
+    const params = `@${docEntry}@@${lineId}@@${lang}@`;
+
+    getData('getAux', 'getEtiquetaCaixa', params, async (err, res) => {
+        if (err) {
+            console.error('Erro ao buscar dados da etiqueta da caixa no SAP:', err);
+            return;
+        }
+
+        if (!res || !res.value || !res.value[0]) {
+            console.error('Retorno inválido do SAP para caixa:', res);
+            return;
+        }
+
+        const rawRow = res.value[0];
+
+        const formattedLabel = {
+            ItemCode: rawRow[0] || '',
+            ItemName: rawRow[1] || '',
+            BarCode: rawRow[2] || '',
+            BatchValue: rawRow[3] || '',
+            BPLName: rawRow[4] || '',
+            BPLAdress1: rawRow[5] || '',
+            BPLAdress2: rawRow[6] || '',
+            BPLInfo: rawRow[7] || '',
+            LogoZPL: rawRow[8] || '',
+            QuantityValue: rawRow[9] || '',
+            TraceabilityValue: rawRow[10] || '',
+            QrCode: rawRow[11] || '',
+            MnfDateValue: rawRow[12] || '',
+            ExpDateValue: rawRow[13] || '',
+            GrossWeightValue: rawRow[14] || '',
+            NetWeightValue: rawRow[15] || '',
+            GrossWeightText: rawRow[16] || '',
+            NetWeightText: rawRow[17] || '',
+            QuantityText: rawRow[18] || '',
+            MnfDateText: rawRow[19] || '',
+            ExpDateText: rawRow[20] || '',
+            TraceabilityText: rawRow[21] || '',
+            BatchText: rawRow[22] || '',
+            InternalControl1: rawRow[23] || '',
+            InternalControl2: rawRow[24] || '',
+            ProducedBy: rawRow[25] || ''
+        };
+
+        const printPayload = {
+            printerCode: this.userSettings.printer,
+            labelCode: "caixaProducao",
+            labelData: [formattedLabel]
+        };
+
+        console.log("PAYLOAD DA ETIQUETA DA CAIXA MONTADO:", JSON.stringify(printPayload));
     });
 }
