@@ -878,6 +878,27 @@ export function printBoxLabel(docEntry, lineId) {
             labelData: [formattedLabel]
         };
 
-        console.log("PAYLOAD DA ETIQUETA DA CAIXA MONTADO:", JSON.stringify(printPayload));
+        console.log("Enviando PAYLOAD ETIQUETA DA CAIXA para a impressora:", JSON.stringify(printPayload));
+        
+        try {
+            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
+            const response = await fetch('http://190.128.212.242:9906/print/labels', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(printPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro API: ${response.status}`);
+            }
+            
+            this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
+        } catch (printErr) {
+            console.error('Erro ao imprimir etiqueta de caixa:', printErr);
+            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+        }
     });
 }
