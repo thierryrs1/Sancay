@@ -300,6 +300,30 @@ export async function registerBox() {
         const now = new Date();
         const createTime = now.getHours() * 100 + now.getMinutes();
 
+        let boxCode = `CX-${Date.now()}`; // Fallback original
+        
+        try {
+            const nextBoxRes = await fetch('http://192.168.30.14:9908/api/v1/nextPallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: "CX" })
+            });
+            
+            if (nextBoxRes.ok) {
+                const data = await nextBoxRes.json();
+                console.log("Retorno da API nextPallet (CX):", data);
+                let extractedCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
+                if (typeof extractedCode === 'object' && extractedCode !== null) {
+                    extractedCode = Object.values(extractedCode)[0];
+                }
+                if (extractedCode) {
+                    boxCode = extractedCode.toString();
+                }
+            }
+        } catch (apiErr) {
+            console.warn('Erro ao chamar API nextPallet (CX), usando código fallback.', apiErr);
+        }
+
         const boxNum = this.currentPallet.boxes.length;
         const updatePayload = {
             "DocEntry": this.currentPallet.docEntry,
@@ -313,10 +337,10 @@ export async function registerBox() {
                     "U_SPS_OPCode": this.currentPallet.op,
                     "U_SPS_ItemCode": this.currentPallet.itemCode || "",
                     "U_SPS_DistNumber": this.currentPallet.op,
-                    "U_SPS_BoxCode": `CX-${Date.now()}`,
+                    "U_SPS_BoxCode": boxCode,
                     "U_SPS_BoxWeight": weight,
                     "U_SPS_Tare": 0,
-                    "U_SPS_BoxQRCode": `CX-${Date.now()}`,
+                    "U_SPS_BoxQRCode": boxCode,
                     "U_SPS_Status": "EMPESAGEM",
                     "U_SPS_CreateDate": now.toISOString().split('T')[0],
                     "U_SPS_CreateTime": createTime,
