@@ -183,7 +183,7 @@ export async function startNewPallet() {
             "U_SPS_ExpectedQty": parseFloat(op[4] || 0) / parseFloat(op[6] || 1),
             "U_SPS_WhsCode": op[10] ? op[10].toString() : "",
             "U_SPS_AbsEntry": op[11] ? op[11].toString() : "",
-            "U_SPS_CreateUser": "manager",
+            "U_SPS_CreateUser": window.appInfo.sapUserCode || "manager",
             "U_SPS_Printed": "N"
         };
 
@@ -361,7 +361,7 @@ export async function registerBox() {
                     "U_SPS_Status": "EMPESAGEM",
                     "U_SPS_CreateDate": now.toISOString().split('T')[0],
                     "U_SPS_CreateTime": createTime,
-                    "U_SPS_CreateUser": "manager",
+                    "U_SPS_CreateUser": window.appInfo.sapUserCode || "manager",
                     "U_SPS_Printed": "N"
                 }
             ]
