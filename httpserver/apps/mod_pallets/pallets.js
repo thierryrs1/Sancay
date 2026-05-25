@@ -143,12 +143,34 @@ export async function startNewPallet() {
     try {
         document.getElementById('bs-loading').classList.remove('is-hidden');
 
+        let palletCode = `${op[9]}-${op[0]}/${op[1]}`; // Fallback original
+        
+        try {
+            const nextPalletRes = await fetch('http://192.168.30.14:9908/api/v1/nextPallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: "PLP" })
+            });
+            
+            if (nextPalletRes.ok) {
+                const data = await nextPalletRes.json();
+                console.log("Retorno da API nextPallet:", data);
+                // Extraindo de chaves comuns ou do próprio objeto raiz
+                palletCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
+                if (typeof palletCode === 'object' && palletCode !== null) {
+                    palletCode = Object.values(palletCode)[0];
+                }
+            }
+        } catch (apiErr) {
+            console.warn('Erro ao chamar API nextPallet, usando código fallback.', apiErr);
+        }
+
         const palletPayload = {
             "U_SPS_Tipo": "PALLET",
             "U_SPS_OPCode": `${op[0]}/${op[1]}`,
-            "U_SPS_PalletCode": `${op[9]}-${op[0]}/${op[1]}`,
+            "U_SPS_PalletCode": palletCode.toString(),
             "U_SPS_Status": "ABERTO",
-            "U_SPS_QRCode": `${op[9]}-${op[0]}/${op[1]}`,
+            "U_SPS_QRCode": palletCode.toString(),
             "U_SPS_ExpectedQty": parseFloat(op[4] || 0) / parseFloat(op[6] || 1),
             "U_SPS_CreateUser": "manager",
             "U_SPS_Printed": "N"
@@ -873,5 +895,25 @@ export function printBoxLabel(docEntry, lineId) {
             labelData: [formattedLabel]
         };
 
+        try {
+            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
+            const response = await fetch('http://190.128.212.242:9906/print/labels', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(printPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro API: ${response.status}`);
+            }
+            
+            this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
+        } catch (printErr) {
+            console.error('Erro ao imprimir etiqueta de caixa:', printErr);
+            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+        }
     });
 }
