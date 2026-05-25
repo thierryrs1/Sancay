@@ -146,23 +146,27 @@ export async function startNewPallet() {
         let palletCode = `${op[9]}-${op[0]}/${op[1]}`; // Fallback original
         
         try {
-            const nextPalletRes = await fetch('http://192.168.30.14:9908/api/v1/nextPallet', {
+            const nextPalletRes = await fetch('http://192.168.30.14:9908/api/v1/createIdWms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: "PLP" })
+                body: JSON.stringify({ type: "PLP", quantity: 1 })
             });
             
             if (nextPalletRes.ok) {
                 const data = await nextPalletRes.json();
-                console.log("Retorno da API nextPallet:", data);
-                // Extraindo de chaves comuns ou do próprio objeto raiz
-                palletCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
-                if (typeof palletCode === 'object' && palletCode !== null) {
-                    palletCode = Object.values(palletCode)[0];
+                console.log("Retorno da API createIdWms (PLP):", data);
+                if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
+                    palletCode = data.codes[0];
+                } else {
+                    // Fallback para as chaves comuns caso a estrutura varie
+                    palletCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
+                    if (typeof palletCode === 'object' && palletCode !== null) {
+                        palletCode = Object.values(palletCode)[0];
+                    }
                 }
             }
         } catch (apiErr) {
-            console.warn('Erro ao chamar API nextPallet, usando código fallback.', apiErr);
+            console.warn('Erro ao chamar API createIdWms, usando código fallback.', apiErr);
         }
 
         const palletPayload = {
@@ -303,25 +307,31 @@ export async function registerBox() {
         let boxCode = `CX-${Date.now()}`; // Fallback original
         
         try {
-            const nextBoxRes = await fetch('http://192.168.30.14:9908/api/v1/nextPallet', {
+            const nextBoxRes = await fetch('http://192.168.30.14:9908/api/v1/createIdWms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: "CX" })
+                body: JSON.stringify({ type: "CX", quantity: 1 })
             });
             
             if (nextBoxRes.ok) {
                 const data = await nextBoxRes.json();
-                console.log("Retorno da API nextPallet (CX):", data);
-                let extractedCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
-                if (typeof extractedCode === 'object' && extractedCode !== null) {
-                    extractedCode = Object.values(extractedCode)[0];
+                console.log("Retorno da API createIdWms (CX):", data);
+                let extractedCode = null;
+                if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
+                    extractedCode = data.codes[0];
+                } else {
+                    extractedCode = data.code || data.palletCode || data.nextPallet || data.nextCode || data.id || data.value || data.nextNumber || data;
+                    if (typeof extractedCode === 'object' && extractedCode !== null) {
+                        extractedCode = Object.values(extractedCode)[0];
+                    }
                 }
+                
                 if (extractedCode) {
                     boxCode = extractedCode.toString();
                 }
             }
         } catch (apiErr) {
-            console.warn('Erro ao chamar API nextPallet (CX), usando código fallback.', apiErr);
+            console.warn('Erro ao chamar API createIdWms (CX), usando código fallback.', apiErr);
         }
 
         const boxNum = this.currentPallet.boxes.length;
