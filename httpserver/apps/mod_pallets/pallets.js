@@ -133,6 +133,11 @@ export function fetchProductionOrders() {
 }
 
 export async function startNewPallet() {
+    if (!window.appInfo || !window.appInfo.sapUserCode) {
+        this.showToast(this._t('Colaborador não possui usuário SAP cadastrado'));
+        return;
+    }
+
     if (!window.app.appData.selectedOrder) {
         this.showToast(this._t('Selecione uma OP primeiro.'));
         return;
@@ -568,6 +573,11 @@ export function pauseProduction() {
 }
 
 export async function openActivePallet(id) {
+    if (!window.appInfo || !window.appInfo.sapUserCode) {
+        this.showToast(this._t('Colaborador não possui usuário SAP cadastrado'));
+        return;
+    }
+
     const p = (this.sapActivePallets || []).find(p => p.id === id) || this.pallets.find(p => p.id === id);
     if (!p) return;
 
@@ -744,6 +754,11 @@ export function deleteBox(idx) {
 }
 
 export function reopenPallet() {
+    if (!window.appInfo || !window.appInfo.sapUserCode) {
+        this.showToast(this._t('Colaborador não possui usuário SAP cadastrado'));
+        return;
+    }
+
     if (!this.viewedPalletId) return;
     const p = (this.sapClosedPallets && this.sapClosedPallets.find(x => x.id === this.viewedPalletId)) || this.pallets.find(p => p.id === this.viewedPalletId);
     if (p) {

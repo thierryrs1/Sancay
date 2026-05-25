@@ -1,5 +1,33 @@
 import { getData } from './api.js';
 
+export function loadSAPUser() {
+    if (!window.appInfo) window.appInfo = {};
+    const uid = window.appInfo.uid ? window.appInfo.uid.toString() : '1';
+    
+    getData('getAux', 'getSAPUser', uid, (err, res) => {
+        if (err) {
+            console.error('Erro ao buscar usuário SAP:', err);
+            window.appInfo.sapUserCode = null;
+            return;
+        }
+
+        let userCode = null;
+        if (res && res.value && Array.isArray(res.value) && res.value.length > 0) {
+            userCode = Array.isArray(res.value[0]) ? res.value[0][0] : Object.values(res.value[0])[0];
+        } else if (Array.isArray(res) && res.length > 0) {
+            userCode = Array.isArray(res[0]) ? res[0][0] : Object.values(res[0])[0];
+        }
+
+        // Se retornar vazio ou só espaços, trata como nulo
+        if (typeof userCode === 'string' && userCode.trim() === '') {
+            userCode = null;
+        }
+
+        window.appInfo.sapUserCode = userCode;
+        console.log("SAP User carregado:", window.appInfo.sapUserCode);
+    });
+}
+
 export function loadUserSettings() {
     const uid = window.appInfo && window.appInfo.uid ? window.appInfo.uid.toString() : '1';
     

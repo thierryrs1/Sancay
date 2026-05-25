@@ -55,6 +55,7 @@ import {
 } from './pallets.js';
 
 import {
+    loadSAPUser,
     loadUserSettings,
     loadEquipList,
     updateSettingsUI,
@@ -156,6 +157,7 @@ export class SancayPortal {
         
         this.loadEquipList();
         this.loadUserSettings();
+        this.loadSAPUser();
 
         this.fetchProductionOrders();
 
@@ -224,6 +226,7 @@ Object.assign(SancayPortal.prototype, {
     closeHistoryFilter,
 
     // Settings Operations
+    loadSAPUser,
     loadUserSettings,
     loadEquipList,
     updateSettingsUI,
