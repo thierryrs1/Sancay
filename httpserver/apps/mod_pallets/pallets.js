@@ -144,17 +144,17 @@ export async function startNewPallet() {
         document.getElementById('bs-loading').classList.remove('is-hidden');
 
         let palletCode = `${op[9]}-${op[0]}/${op[1]}`; // Fallback original
-        
+
         try {
-            const nextPalletRes = await fetch('http://192.168.30.14:9908/api/v1/createIdWms', {
+            const nextPalletRes = await fetch('http://192.168.30.14:9908/api/v1/createWMSCode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: "PLP", quantity: 1 })
             });
-            
+
             if (nextPalletRes.ok) {
                 const data = await nextPalletRes.json();
-                console.log("Retorno da API createIdWms (PLP):", data);
+                console.log("Retorno da API createWMSCode (PLP):", data);
                 if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
                     palletCode = data.codes[0];
                 } else {
@@ -166,7 +166,7 @@ export async function startNewPallet() {
                 }
             }
         } catch (apiErr) {
-            console.warn('Erro ao chamar API createIdWms, usando código fallback.', apiErr);
+            console.warn('Erro ao chamar API createWMSCode, usando código fallback.', apiErr);
         }
 
         const palletPayload = {
@@ -305,17 +305,17 @@ export async function registerBox() {
         const createTime = now.getHours() * 100 + now.getMinutes();
 
         let boxCode = `CX-${Date.now()}`; // Fallback original
-        
+
         try {
-            const nextBoxRes = await fetch('http://192.168.30.14:9908/api/v1/createIdWms', {
+            const nextBoxRes = await fetch('http://192.168.30.14:9908/api/v1/createWMSCode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: "CX", quantity: 1 })
             });
-            
+
             if (nextBoxRes.ok) {
                 const data = await nextBoxRes.json();
-                console.log("Retorno da API createIdWms (CX):", data);
+                console.log("Retorno da API createWMSCode (CX):", data);
                 let extractedCode = null;
                 if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
                     extractedCode = data.codes[0];
@@ -325,13 +325,13 @@ export async function registerBox() {
                         extractedCode = Object.values(extractedCode)[0];
                     }
                 }
-                
+
                 if (extractedCode) {
                     boxCode = extractedCode.toString();
                 }
             }
         } catch (apiErr) {
-            console.warn('Erro ao chamar API createIdWms (CX), usando código fallback.', apiErr);
+            console.warn('Erro ao chamar API createWMSCode (CX), usando código fallback.', apiErr);
         }
 
         const boxNum = this.currentPallet.boxes.length;
@@ -933,7 +933,7 @@ export function printBoxLabel(docEntry, lineId) {
             const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
             const response = await fetch('http://190.128.212.242:9906/print/labels', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -943,7 +943,7 @@ export function printBoxLabel(docEntry, lineId) {
             if (!response.ok) {
                 throw new Error(`Erro API: ${response.status}`);
             }
-            
+
             this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
         } catch (printErr) {
             console.error('Erro ao imprimir etiqueta de caixa:', printErr);
