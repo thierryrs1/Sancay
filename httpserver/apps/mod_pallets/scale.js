@@ -31,33 +31,43 @@ export function simulateWeight() {
     setTimeout(() => { this.scaleLocked = false; }, 3000);
 }
 
-export function startScaleSimulation() {
-    setInterval(async () => {
-        if (this.isScaleConnected && this.currentView === 'process-view' && !this.scaleLocked) {
-            
-            if (!this.userSettings || !this.userSettings.scale) {
-                console.warn("Balança não configurada no usuário.");
-                return;
-            }
-
-            try {
-                const response = await fetch('http://192.168.30.14:9908/api/v1/readWeightByID', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ scaleId: this.userSettings.scale })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
-                        this.el.liveWeightDisplay.textContent = parseFloat(data.weightKilogram).toFixed(3);
-                    }
-                }
-            } catch (err) {
-                console.error("Erro ao ler peso da balança API:", err);
-            }
+export async function readScaleWeight() {
+    if (this.isScaleConnected && this.currentView === 'process-view' && !this.scaleLocked) {
+        
+        if (!this.userSettings || !this.userSettings.scale) {
+            console.warn("Balança não configurada no usuário.");
+            return;
         }
-    }, 5000);
+
+        try {
+            const response = await fetch('http://192.168.30.14:9908/api/v1/readWeightByID', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ scaleId: this.userSettings.scale })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
+                    this.el.liveWeightDisplay.textContent = parseFloat(data.weightKilogram).toFixed(3);
+                }
+            }
+        } catch (err) {
+            console.error("Erro ao ler peso da balança API:", err);
+        }
+    }
+}
+
+export function startScaleSimulation() {
+    if (typeof this.readScaleWeight !== 'function') {
+        this.readScaleWeight = readScaleWeight.bind(this);
+    }
+
+    // Executa a primeira vez imediatamente
+    this.readScaleWeight();
+    
+    // E depois a cada 5 segundos
+    setInterval(() => this.readScaleWeight(), 5000);
 }
 
 export function openScaleAuthModal() {

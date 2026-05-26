@@ -332,7 +332,13 @@ export function switchView(viewId) {
     this.currentView = viewId;
     if (viewId === 'dashboard') this.renderDashboard();
     if (viewId === 'history') this.renderHistory();
-    if (viewId === 'process-view' && this.currentPallet) this.updateProcessView();
+    if (viewId === 'process-view') {
+        if (this.currentPallet) this.updateProcessView();
+        // Chama a balança na hora sem esperar o intervalo de 5s do background
+        if (typeof this.readScaleWeight === 'function') {
+            this.readScaleWeight();
+        }
+    }
 
     this.updateStats();
     this.updateTitle(viewId);

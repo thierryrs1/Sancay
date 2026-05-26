@@ -7,6 +7,7 @@ import {
     toggleScale,
     simulateWeight,
     startScaleSimulation,
+    readScaleWeight,
     openScaleAuthModal,
     closeScaleAuthModal,
     submitScaleAuth
@@ -200,6 +201,7 @@ Object.assign(SancayPortal.prototype, {
     toggleScale,
     simulateWeight,
     startScaleSimulation,
+    readScaleWeight,
     openScaleAuthModal,
     closeScaleAuthModal,
     submitScaleAuth,
