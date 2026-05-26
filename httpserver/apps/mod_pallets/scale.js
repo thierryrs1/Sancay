@@ -32,12 +32,32 @@ export function simulateWeight() {
 }
 
 export function startScaleSimulation() {
-    setInterval(() => {
+    setInterval(async () => {
         if (this.isScaleConnected && this.currentView === 'process-view' && !this.scaleLocked) {
-            const base = 24.5 + (Math.random() * 1.5);
-            if (this.el.liveWeightDisplay) this.el.liveWeightDisplay.textContent = base.toFixed(2);
+            
+            if (!this.userSettings || !this.userSettings.scale) {
+                console.warn("Balança não configurada no usuário.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://192.168.30.14:9908/api/v1/readWeightByID', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scaleId: this.userSettings.scale })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
+                        this.el.liveWeightDisplay.textContent = parseFloat(data.weightKilogram).toFixed(3);
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao ler peso da balança API:", err);
+            }
         }
-    }, 2000);
+    }, 5000);
 }
 
 export function openScaleAuthModal() {

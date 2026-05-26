@@ -1,0 +1,5 @@
+﻿// DataWindow loaded
+// Created 25.05.2026 10:50:01 from jsilva, Station fsartorinew
+global function dw_1_load
+dw_1.item.grenz_indirekt_lohn_t.formatstring=text=GGF,
+end global
