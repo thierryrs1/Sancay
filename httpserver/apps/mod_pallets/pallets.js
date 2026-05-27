@@ -390,7 +390,7 @@ export async function registerBox() {
                     "U_SPS_CreateDate": now.toISOString().split('T')[0],
                     "U_SPS_CreateTime": createTime,
                     "U_SPS_CreateUser": window.appInfo.sapUserCode || "manager",
-                    "U_SPS_Printed": "N"
+                    "U_SPS_Printed": "Y"
                 }
             ]
         };
@@ -452,7 +452,7 @@ export function closePallet() {
             "U_SPS_PalletCode": this.currentPallet.id,
             "U_SPS_Status": "FINALIZADO",
             "U_SPS_UpdateUser": "manager",
-            "U_SPS_Printed": "N",
+            "U_SPS_Printed": "Y",
             "SPS_PALLET_GROUP_LCollection": []
         };
         document.getElementById('bs-loading').classList.remove('is-hidden');
@@ -490,7 +490,7 @@ export function closePallet() {
                 "U_SPS_PalletCode": this.currentPallet.id,
                 "U_SPS_Status": "FINALIZADO",
                 "U_SPS_UpdateUser": "manager",
-                "U_SPS_Printed": "N",
+                "U_SPS_Printed": "Y",
                 "SPS_PALLET_GROUP_LCollection": []
             };
 
