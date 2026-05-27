@@ -65,7 +65,6 @@ export async function readScaleWeight() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('📦 Retorno da API Balança:', data);
                 
                 if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
                     this.currentGrossWeight = parseFloat(data.weightKilogram);

@@ -176,6 +176,8 @@ export async function startNewPallet() {
         const palletPayload = {
             "U_SPS_Tipo": "PALLET",
             "U_SPS_OPCode": `${op[0]}/${op[1]}`,
+            "U_SPS_BELNR_ID": Number(op[0]),
+            "U_SPS_BELPOS_ID": Number(op[1]),
             "U_SPS_PalletCode": palletCode.toString(),
             "U_SPS_Status": "ABERTO",
             "U_SPS_QRCode": palletCode.toString(),
@@ -340,7 +342,7 @@ export async function registerBox() {
         }
 
         const boxNum = this.currentPallet.boxes.length;
-        
+
         let tare = this.scaleTare || 0;
         if (!this.isScaleConnected && !this.scaleManualMode) {
             tare = 0; // Se não tiver nada conectado, nem manual
@@ -350,12 +352,16 @@ export async function registerBox() {
             "DocEntry": this.currentPallet.docEntry,
             "U_SPS_Tipo": "PALLET",
             "U_SPS_OPCode": this.currentPallet.op,
+            "U_SPS_BELNR_ID": Number(this.currentPallet.op.split('/')[0]),
+            "U_SPS_BELPOS_ID": Number(this.currentPallet.op.split('/')[1]),
             "U_SPS_PalletCode": this.currentPallet.id,
             "U_SPS_Status": "EM PROCESSO",
             "U_SPS_Origem": "PRODUCTION",
             "SPS_PALLET_GROUP_LCollection": [
                 {
                     "U_SPS_OPCode": this.currentPallet.op,
+                    "U_SPS_BELNR_ID": Number(this.currentPallet.op.split('/')[0]),
+                    "U_SPS_BELPOS_ID": Number(this.currentPallet.op.split('/')[1]),
                     "U_SPS_ItemCode": this.currentPallet.itemCode || "",
                     "U_SPS_DistNumber": this.currentPallet.op,
                     "U_SPS_BoxCode": boxCode,
@@ -379,6 +385,11 @@ export async function registerBox() {
         });
 
         const res = await response.json();
+        if (!response.ok || (res.error)) {
+            console.error('Erro na API updatePallet:', res);
+            throw new Error(res.error ? res.error.message.value : 'Erro ao atualizar pallet no SAP');
+        }
+
         document.getElementById('bs-loading').classList.add('is-hidden');
         this.showToast(this._t('Caixa registrada'));
 
@@ -417,6 +428,8 @@ export function closePallet() {
             "DocEntry": this.currentPallet.docEntry,
             "U_SPS_Tipo": "PALLET",
             "U_SPS_OPCode": this.currentPallet.op,
+            "U_SPS_BELNR_ID": Number(this.currentPallet.op.split('/')[0]),
+            "U_SPS_BELPOS_ID": Number(this.currentPallet.op.split('/')[1]),
             "U_SPS_PalletCode": this.currentPallet.id,
             "U_SPS_Status": "FINALIZADO",
             "U_SPS_UpdateUser": "manager",
@@ -453,6 +466,8 @@ export function closePallet() {
                 "DocEntry": this.currentPallet.docEntry,
                 "U_SPS_Tipo": "PALLET",
                 "U_SPS_OPCode": this.currentPallet.op,
+                "U_SPS_BELNR_ID": Number(this.currentPallet.op.split('/')[0]),
+                "U_SPS_BELPOS_ID": Number(this.currentPallet.op.split('/')[1]),
                 "U_SPS_PalletCode": this.currentPallet.id,
                 "U_SPS_Status": "FINALIZADO",
                 "U_SPS_UpdateUser": "manager",
