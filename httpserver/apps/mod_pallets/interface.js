@@ -249,7 +249,7 @@ export function bindEvents() {
     // Filter Modal Event Handlers
     if (this.el.openFilterBtn) {
         this.el.openFilterBtn.addEventListener('click', () => {
-            const allPallets = [...(this.sapActivePallets || []), ...(this.sapClosedPallets || [])];
+            const allPallets = window.app?.appData?.pendingPallets || this.sapActivePallets || [];
 
             const updateSummary = (containerEl, defaultText) => {
                 if(!containerEl) return;
