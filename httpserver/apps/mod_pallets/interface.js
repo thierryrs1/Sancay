@@ -165,10 +165,10 @@ export function bindEvents() {
 
     this.el.startPalletBtn.addEventListener('click', () => this.startNewPallet());
     this.el.toggleScaleStatusBtn.addEventListener('click', () => {
-        if (this.isScaleConnected) {
-            this.openScaleAuthModal();
-        } else {
+        if (this.scaleManualMode) {
             this.toggleScale();
+        } else {
+            this.openScaleAuthModal();
         }
     });
     if (this.el.simulateWeightBtn) {

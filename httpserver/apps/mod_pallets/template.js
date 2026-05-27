@@ -209,13 +209,13 @@ export function getPortalTemplate(t) {
                                         <input type="number" id="manual-weight-input" class="manual-input" style="display: none;" placeholder="0.00">
                                         <small>kg</small>
                                     </div>
-                                    <div id="tare-info" style="font-size: 1.1em; color: #fcd34d; margin-bottom: 16px; display: none; background: rgba(252, 211, 77, 0.1); padding: 6px 16px; border-radius: 8px; border: 1px solid rgba(252, 211, 77, 0.3);">
+                                    <div id="tare-info" class="tare-info-container">
                                         Tara: <span id="tare-value" style="font-weight: 900; font-size: 1.2em;">0.00</span> kg 
-                                        <a href="#" id="clear-tare-btn" style="color: #f87171; margin-left: 12px; text-decoration: underline; font-weight: bold;">(Limpar)</a>
+                                        <a href="#" id="clear-tare-btn">(Limpar)</a>
                                     </div>
-                                    <div class="scale-actions" style="display: flex; gap: 12px; justify-content: center; width: 100%;">
-                                        <button id="tare-btn" class="btn large" style="flex: 1; background: #ec4899 !important; color: #ffffff !important; border: none !important; font-weight: 800; padding: 14px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); text-transform: uppercase; letter-spacing: 1px;">${t('TARA')}</button>
-                                        <button id="register-box-btn" class="btn primary large" style="flex: 2;">${t('REGISTRAR CAIXA')}</button>
+                                    <div class="scale-actions">
+                                        <button id="tare-btn" class="btn btn-tare large">${t('TARA')}</button>
+                                        <button id="register-box-btn" class="btn btn-register large">${t('REGISTRAR CAIXA')}</button>
                                     </div>
                                 </div>
                                 <div class="production-summary">
