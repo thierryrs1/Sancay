@@ -249,7 +249,7 @@ export function bindEvents() {
     // Filter Modal Event Handlers
     if (this.el.openFilterBtn) {
         this.el.openFilterBtn.addEventListener('click', () => {
-            const allPallets = window.app?.appData?.pendingPallets || this.sapActivePallets || [];
+            const allPallets = (window.app && window.app.appData && window.app.appData.pendingPallets) ? window.app.appData.pendingPallets : (this.sapActivePallets || []);
 
             const updateSummary = (containerEl, defaultText) => {
                 if(!containerEl) return;
@@ -639,18 +639,10 @@ export function renderHistory() {
     }
     let closed = this.sapClosedPallets || [];
 
-    // 1. Aplicar filtros gerais de pesquisa se houver
-    const activeFilters = hasActiveFilters(this.filters);
-    if (activeFilters) {
-        closed = closed.filter(p => checkFilters(p, this.filters));
-        if (this.el.activeFiltersIndicatorHistory) {
-            this.el.activeFiltersIndicatorHistory.style.display = 'flex';
-        }
-    } else {
-        if (this.el.activeFiltersIndicatorHistory) {
-            this.el.activeFiltersIndicatorHistory.style.display = 'none';
-        }
+    if (this.el.activeFiltersIndicatorHistory) {
+        this.el.activeFiltersIndicatorHistory.style.display = 'none';
     }
+
 
     // 2. Aplicar filtros de coluna do Excel
     Object.keys(this.historyColumnFilters).forEach(columnId => {
