@@ -249,9 +249,45 @@ export function bindEvents() {
     // Filter Modal Event Handlers
     if (this.el.openFilterBtn) {
         this.el.openFilterBtn.addEventListener('click', () => {
-            if (this.el.filterPalletId) this.el.filterPalletId.value = this.filters.palletId || '';
-            if (this.el.filterOp) this.el.filterOp.value = this.filters.op || '';
-            if (this.el.filterItem) this.el.filterItem.value = this.filters.item || '';
+            const allPallets = [...(this.sapActivePallets || []), ...(this.sapClosedPallets || [])];
+
+            if (this.el.filterPalletId) {
+                const uniqueIds = [...new Set(allPallets.map(p => p.id).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
+                this.el.filterPalletId.innerHTML = uniqueIds.map(id => `<option value="${id}">${id}</option>`).join('');
+                if (Array.isArray(this.filters.palletId)) {
+                    Array.from(this.el.filterPalletId.options).forEach(opt => opt.selected = this.filters.palletId.includes(opt.value));
+                }
+            }
+
+            if (this.el.filterOp) {
+                const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
+                this.el.filterOp.innerHTML = uniqueOps.map(op => `<option value="${op}">${op}</option>`).join('');
+                if (Array.isArray(this.filters.op)) {
+                    Array.from(this.el.filterOp.options).forEach(opt => opt.selected = this.filters.op.includes(opt.value));
+                }
+            }
+
+            if (this.el.filterItem) {
+                const uniqueItemsMap = new Map();
+                allPallets.forEach(p => {
+                    const iCode = p.itemCode || (this.productionOrders && this.productionOrders.find(o => `${o[0]}/${o[1]}`.replace(/\s+/g, '') === p.op.toString().replace(/\s+/g, ''))?.[2]) || '';
+                    const iMat = p.material || (this.productionOrders && this.productionOrders.find(o => `${o[0]}/${o[1]}`.replace(/\s+/g, '') === p.op.toString().replace(/\s+/g, ''))?.[3]) || '';
+                    if (iCode) {
+                        uniqueItemsMap.set(iCode, iMat);
+                    }
+                });
+                
+                let itemsHtml = '';
+                Array.from(uniqueItemsMap.keys()).sort((a,b) => String(a).localeCompare(String(b))).forEach(code => {
+                    const desc = uniqueItemsMap.get(code);
+                    itemsHtml += `<option value="${code}">${code} | ${desc}</option>`;
+                });
+                this.el.filterItem.innerHTML = itemsHtml;
+                if (Array.isArray(this.filters.item)) {
+                    Array.from(this.el.filterItem.options).forEach(opt => opt.selected = this.filters.item.includes(opt.value));
+                }
+            }
+
             if (this.el.filterDateStart) this.el.filterDateStart.value = this.filters.dateStart || '';
             if (this.el.filterDateEnd) this.el.filterDateEnd.value = this.filters.dateEnd || '';
 
@@ -269,13 +305,13 @@ export function bindEvents() {
 
     if (this.el.clearFilterBtn) {
         this.el.clearFilterBtn.addEventListener('click', () => {
-            if (this.el.filterPalletId) this.el.filterPalletId.value = '';
-            if (this.el.filterOp) this.el.filterOp.value = '';
-            if (this.el.filterItem) this.el.filterItem.value = '';
+            if (this.el.filterPalletId) Array.from(this.el.filterPalletId.options).forEach(o => o.selected = false);
+            if (this.el.filterOp) Array.from(this.el.filterOp.options).forEach(o => o.selected = false);
+            if (this.el.filterItem) Array.from(this.el.filterItem.options).forEach(o => o.selected = false);
             if (this.el.filterDateStart) this.el.filterDateStart.value = '';
             if (this.el.filterDateEnd) this.el.filterDateEnd.value = '';
 
-            this.filters = { palletId: '', op: '', item: '', dateStart: '', dateEnd: '' };
+            this.filters = { palletId: [], op: [], item: [], dateStart: '', dateEnd: '' };
 
             this.renderDashboard();
             this.renderHistory();
@@ -288,9 +324,9 @@ export function bindEvents() {
 
     if (this.el.applyFilterBtn) {
         this.el.applyFilterBtn.addEventListener('click', () => {
-            this.filters.palletId = this.el.filterPalletId ? this.el.filterPalletId.value : '';
-            this.filters.op = this.el.filterOp ? this.el.filterOp.value : '';
-            this.filters.item = this.el.filterItem ? this.el.filterItem.value : '';
+            this.filters.palletId = this.el.filterPalletId ? Array.from(this.el.filterPalletId.selectedOptions).map(o => o.value) : [];
+            this.filters.op = this.el.filterOp ? Array.from(this.el.filterOp.selectedOptions).map(o => o.value) : [];
+            this.filters.item = this.el.filterItem ? Array.from(this.el.filterItem.selectedOptions).map(o => o.value) : [];
             this.filters.dateStart = this.el.filterDateStart ? this.el.filterDateStart.value : '';
             this.filters.dateEnd = this.el.filterDateEnd ? this.el.filterDateEnd.value : '';
 
@@ -306,7 +342,7 @@ export function bindEvents() {
     if (this.el.clearAllFiltersBtns) {
         this.el.clearAllFiltersBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                this.filters = { palletId: '', op: '', item: '', dateStart: '', dateEnd: '' };
+                this.filters = { palletId: [], op: [], item: [], dateStart: '', dateEnd: '' };
                 this.renderDashboard();
                 this.renderHistory();
                 this.showToast(this._t('Filtros limpos com sucesso.'));
@@ -796,27 +832,23 @@ function checkFilters(p, filters) {
     if (!filters) return true;
     
     // 1. Pallet ID filter
-    if (filters.palletId && filters.palletId.trim() !== '') {
-        const query = filters.palletId.trim().toLowerCase();
-        if (!p.id || !p.id.toString().toLowerCase().includes(query)) {
+    if (filters.palletId && Array.isArray(filters.palletId) && filters.palletId.length > 0) {
+        if (!p.id || !filters.palletId.includes(p.id.toString())) {
             return false;
         }
     }
     
     // 2. OP filter
-    if (filters.op && filters.op.trim() !== '') {
-        const query = filters.op.trim().toLowerCase();
-        if (!p.op || !p.op.toString().toLowerCase().includes(query)) {
+    if (filters.op && Array.isArray(filters.op) && filters.op.length > 0) {
+        if (!p.op || !filters.op.includes(p.op.toString())) {
             return false;
         }
     }
     
     // 3. Item filter
-    if (filters.item && filters.item.trim() !== '') {
-        const query = filters.item.trim().toLowerCase();
-        const codeMatch = p.itemCode && p.itemCode.toString().toLowerCase().includes(query);
-        const nameMatch = p.material && p.material.toString().toLowerCase().includes(query);
-        if (!codeMatch && !nameMatch) {
+    if (filters.item && Array.isArray(filters.item) && filters.item.length > 0) {
+        const iCode = p.itemCode ? p.itemCode.toString() : '';
+        if (!filters.item.includes(iCode)) {
             return false;
         }
     }
@@ -851,9 +883,9 @@ function checkFilters(p, filters) {
 function hasActiveFilters(filters) {
     if (!filters) return false;
     return !!(
-        (filters.palletId && filters.palletId.trim() !== '') ||
-        (filters.op && filters.op.trim() !== '') ||
-        (filters.item && filters.item.trim() !== '') ||
+        (Array.isArray(filters.palletId) ? filters.palletId.length > 0 : (filters.palletId && filters.palletId.trim() !== '')) ||
+        (Array.isArray(filters.op) ? filters.op.length > 0 : (filters.op && filters.op.trim() !== '')) ||
+        (Array.isArray(filters.item) ? filters.item.length > 0 : (filters.item && filters.item.trim() !== '')) ||
         filters.dateStart ||
         filters.dateEnd
     );

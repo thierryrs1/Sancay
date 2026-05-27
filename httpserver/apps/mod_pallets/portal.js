@@ -77,9 +77,9 @@ export class SancayPortal {
         this.translations = {};
         this.isSidebarCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
         this.filters = {
-            palletId: '',
-            op: '',
-            item: '',
+            palletId: [],
+            op: [],
+            item: [],
             dateStart: '',
             dateEnd: ''
         };
