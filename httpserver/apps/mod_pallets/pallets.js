@@ -181,7 +181,7 @@ export async function startNewPallet() {
             "U_SPS_PalletCode": palletCode.toString(),
             "U_SPS_Status": "ABERTO",
             "U_SPS_QRCode": palletCode.toString(),
-            "U_SPS_ExpectedQty": parseFloat(op[12]) || (parseFloat(op[4] || 0) / parseFloat(op[6] || 1)),
+            "U_SPS_ExpectedQty": parseFloat(op[13]) || (parseFloat(op[4] || 0) / parseFloat(op[6] || 1)),
             "U_SPS_WhsCode": op[10] ? op[10].toString() : "",
             "U_SPS_AbsEntry": op[11] ? op[11].toString() : "",
             "U_SPS_CreateUser": window.appInfo.sapUserCode || "manager",
