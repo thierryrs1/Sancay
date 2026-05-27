@@ -607,8 +607,8 @@ export function renderDashboard() {
                         </span>
                     </div>
                     <div style="text-align: right !important; margin: 0 !important; padding: 0 !important; display: block !important;">
-                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 6px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Total Acumulado</span>
-                        <strong style="font-size: 1.8rem !important; font-weight: 800 !important; color: var(--text-strong) !important; margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1 !important;">${totalWeight.toFixed(2)} <span style="font-size: 1.05rem !important; font-weight: 600 !important; color: var(--text-muted) !important;">kg</span></strong>
+                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 6px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Caixas Registradas</span>
+                        <strong style="font-size: 1.8rem !important; font-weight: 800 !important; color: var(--text-strong) !important; margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1 !important;">${p.boxes ? p.boxes.length : 0} <span style="font-size: 1.05rem !important; font-weight: 600 !important; color: var(--text-muted) !important;">CX</span></strong>
                     </div>
                 </div>
 
