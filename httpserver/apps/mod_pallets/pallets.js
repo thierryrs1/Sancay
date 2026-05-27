@@ -348,6 +348,24 @@ export async function registerBox() {
             tare = 0; // Se não tiver nada conectado, nem manual
         }
 
+        let distNumber = this.currentPallet.op;
+        try {
+            const opBelnr = Number(this.currentPallet.op.split('/')[0]);
+            const batchRes = await fetch('http://192.168.30.14:9908/api/v1/getOrderBatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ U_SPS_BELNR_ID: opBelnr })
+            });
+            if (batchRes.ok) {
+                const batchData = await batchRes.json();
+                if (batchData && batchData.DistNumber) {
+                    distNumber = batchData.DistNumber;
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao buscar DistNumber da OP:', e);
+        }
+
         const updatePayload = {
             "DocEntry": this.currentPallet.docEntry,
             "U_SPS_Tipo": "PALLET",
@@ -363,7 +381,7 @@ export async function registerBox() {
                     "U_SPS_BELNR_ID": Number(this.currentPallet.op.split('/')[0]),
                     "U_SPS_BELPOS_ID": Number(this.currentPallet.op.split('/')[1]),
                     "U_SPS_ItemCode": this.currentPallet.itemCode || "",
-                    "U_SPS_DistNumber": this.currentPallet.op,
+                    "U_SPS_DistNumber": distNumber,
                     "U_SPS_BoxCode": boxCode,
                     "U_SPS_BoxWeight": weight,
                     "U_SPS_Tare": tare,
@@ -377,6 +395,7 @@ export async function registerBox() {
             ]
         };
 
+        console.log('📦 Payload Registrar Caixa:', JSON.stringify(updatePayload, null, 2));
 
         const response = await fetch('http://192.168.30.14:9908/api/v1/updatePallet', {
             method: 'POST',
