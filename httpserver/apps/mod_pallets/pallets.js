@@ -206,7 +206,7 @@ export async function startNewPallet() {
                 op: `${op[0]}/${op[1]}`,
                 itemCode: op[2],
                 material: op[3],
-                expectedQty: parseFloat(op[4] || 0) / parseFloat(op[6] || 1),
+                expectedQty: parseFloat(op[13]) || (parseFloat(op[4] || 0) / parseFloat(op[6] || 1)),
                 startTime: new Date().toISOString(),
                 status: 'Em processo',
                 boxes: [],
@@ -243,9 +243,9 @@ export function updateProcessView() {
     const currentCount = this.currentPallet.boxes.length;
     const totalWeight = this.currentPallet.boxes.reduce((s, b) => s + (parseFloat(b.weight) || 0), 0);
     const expected = this.currentPallet.expectedQty || 0;
-    const progressPercent = expected > 0 ? Math.min((totalWeight / expected) * 100, 100) : 0;
+    const progressPercent = expected > 0 ? Math.min((currentCount / expected) * 100, 100) : 0;
 
-    document.getElementById('current-box-count').textContent = `${totalWeight.toFixed(2)} kg / ${expected.toFixed(2)} kg (${progressPercent.toFixed(1)}%)`;
+    document.getElementById('current-box-count').textContent = `${currentCount} / ${expected} CX`;
     if (this.el.progressBar) {
         this.el.progressBar.style.width = `${progressPercent}%`;
     }
