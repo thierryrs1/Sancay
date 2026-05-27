@@ -209,8 +209,13 @@ export function getPortalTemplate(t) {
                                         <input type="number" id="manual-weight-input" class="manual-input" style="display: none;" placeholder="0.00">
                                         <small>kg</small>
                                     </div>
-                                    <div class="scale-actions">
-                                        <button id="register-box-btn" class="btn primary large">${t('REGISTRAR CAIXA')}</button>
+                                    <div id="tare-info" style="font-size: 0.9em; color: var(--text-muted); margin-bottom: 12px; display: none;">
+                                        Tara: <span id="tare-value" style="font-weight: bold;">0.00</span> kg 
+                                        <a href="#" id="clear-tare-btn" style="color: var(--danger-color); margin-left: 10px; text-decoration: none;">(Limpar)</a>
+                                    </div>
+                                    <div class="scale-actions" style="display: flex; gap: 10px; justify-content: center;">
+                                        <button id="tare-btn" class="btn large" style="flex: 1; background-color: #374151; color: #ffffff; border: 1px solid #4b5563; font-weight: bold;">${t('TARA')}</button>
+                                        <button id="register-box-btn" class="btn primary large" style="flex: 2;">${t('REGISTRAR CAIXA')}</button>
                                     </div>
                                 </div>
                                 <div class="production-summary">

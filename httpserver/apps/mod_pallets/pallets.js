@@ -159,7 +159,6 @@ export async function startNewPallet() {
 
             if (nextPalletRes.ok) {
                 const data = await nextPalletRes.json();
-                console.log("Retorno da API createWMSCode (PLP):", data);
                 if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
                     palletCode = data.codes[0];
                 } else {
@@ -322,7 +321,6 @@ export async function registerBox() {
 
             if (nextBoxRes.ok) {
                 const data = await nextBoxRes.json();
-                console.log("Retorno da API createWMSCode (CX):", data);
                 let extractedCode = null;
                 if (data.codes && Array.isArray(data.codes) && data.codes.length > 0) {
                     extractedCode = data.codes[0];
@@ -342,6 +340,12 @@ export async function registerBox() {
         }
 
         const boxNum = this.currentPallet.boxes.length;
+        
+        let tare = this.scaleTare || 0;
+        if (!this.isScaleConnected && !this.scaleManualMode) {
+            tare = 0; // Se não tiver nada conectado, nem manual
+        }
+
         const updatePayload = {
             "DocEntry": this.currentPallet.docEntry,
             "U_SPS_Tipo": "PALLET",
@@ -356,7 +360,7 @@ export async function registerBox() {
                     "U_SPS_DistNumber": this.currentPallet.op,
                     "U_SPS_BoxCode": boxCode,
                     "U_SPS_BoxWeight": weight,
-                    "U_SPS_Tare": 0,
+                    "U_SPS_Tare": tare,
                     "U_SPS_BoxQRCode": boxCode,
                     "U_SPS_Status": "EMPESAGEM",
                     "U_SPS_CreateDate": now.toISOString().split('T')[0],

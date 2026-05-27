@@ -81,6 +81,10 @@ export function mapElements() {
         scaleLabel: document.getElementById('scale-label'),
         simulateWeightBtn: document.getElementById('simulate-weight'),
         registerBoxBtn: document.getElementById('register-box-btn'),
+        tareBtn: document.getElementById('tare-btn'),
+        tareInfo: document.getElementById('tare-info'),
+        tareValue: document.getElementById('tare-value'),
+        clearTareBtn: document.getElementById('clear-tare-btn'),
         closePalletBtn: document.getElementById('close-pallet-btn'),
         pauseProductionBtn: document.getElementById('pause-production-btn'),
         toast: document.getElementById('toast'),
@@ -171,6 +175,44 @@ export function bindEvents() {
         this.el.simulateWeightBtn.addEventListener('click', () => this.simulateWeight());
     }
     this.el.registerBoxBtn.addEventListener('click', () => this.registerBox());
+    
+    if (this.el.tareBtn) {
+        this.el.tareBtn.addEventListener('click', () => {
+            if (this.scaleManualMode) {
+                this.showToast(this._t('Tara indisponível no modo manual.'));
+                return;
+            }
+            if (this.currentGrossWeight > 0) {
+                this.scaleTare = this.currentGrossWeight;
+                this.el.tareInfo.style.display = 'block';
+                this.el.tareValue.textContent = this.scaleTare.toFixed(3);
+                this.showToast(this._t('Tara registrada!'));
+                
+                // Atualiza a tela imediatamente descontando a tara
+                const netWeight = Math.max(0, this.currentGrossWeight - this.scaleTare);
+                if (this.el.liveWeightDisplay) {
+                    this.el.liveWeightDisplay.textContent = netWeight.toFixed(3);
+                }
+            } else {
+                this.showToast(this._t('Peso atual está zerado.'));
+            }
+        });
+    }
+
+    if (this.el.clearTareBtn) {
+        this.el.clearTareBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.scaleTare = 0;
+            this.el.tareInfo.style.display = 'none';
+            this.showToast(this._t('Tara removida!'));
+            
+            // Retorna a exibir o peso bruto
+            if (this.el.liveWeightDisplay) {
+                this.el.liveWeightDisplay.textContent = this.currentGrossWeight ? this.currentGrossWeight.toFixed(3) : '0.000';
+            }
+        });
+    }
+
     this.el.closePalletBtn.addEventListener('click', () => this.closePallet());
     this.el.pauseProductionBtn.addEventListener('click', () => this.pauseProduction());
 

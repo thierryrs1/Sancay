@@ -65,8 +65,14 @@ export async function readScaleWeight() {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log('📦 Retorno da API Balança:', data);
+                
                 if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
-                    this.el.liveWeightDisplay.textContent = parseFloat(data.weightKilogram).toFixed(3);
+                    this.currentGrossWeight = parseFloat(data.weightKilogram);
+                    const tare = this.scaleTare || 0;
+                    const netWeight = Math.max(0, this.currentGrossWeight - tare);
+                    
+                    this.el.liveWeightDisplay.textContent = netWeight.toFixed(3);
                 } else if (data.success === false) {
                     this.isScaleConnected = false;
                     this.scaleManualMode = false; // Força bloqueio total
