@@ -110,9 +110,9 @@ export function mapElements() {
         closeFilterModalBtn: document.getElementById('close-filter-modal'),
         clearFilterBtn: document.getElementById('clear-filter-btn'),
         applyFilterBtn: document.getElementById('apply-filter-btn'),
-        filterPalletId: document.getElementById('filter-pallet-id'),
-        filterOp: document.getElementById('filter-op'),
-        filterItem: document.getElementById('filter-item'),
+        filterPalletId: document.getElementById('filter-pallet-id-container'),
+        filterOp: document.getElementById('filter-op-container'),
+        filterItem: document.getElementById('filter-item-container'),
         filterDateStart: document.getElementById('filter-date-start'),
         filterDateEnd: document.getElementById('filter-date-end'),
         activeFiltersIndicatorDashboard: document.getElementById('active-filters-indicator-dashboard'),
@@ -251,20 +251,38 @@ export function bindEvents() {
         this.el.openFilterBtn.addEventListener('click', () => {
             const allPallets = [...(this.sapActivePallets || []), ...(this.sapClosedPallets || [])];
 
+            const updateSummary = (containerEl, defaultText) => {
+                if(!containerEl) return;
+                const summarySpan = containerEl.parentElement.querySelector('.selected-text');
+                if(!summarySpan) return;
+                const checked = Array.from(containerEl.querySelectorAll('input:checked'));
+                summarySpan.textContent = checked.length > 0 ? `${checked.length} selecionado(s)` : defaultText;
+            };
+
+            const bindCheckboxEvents = (containerEl, defaultText) => {
+                if(!containerEl) return;
+                containerEl.querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', () => updateSummary(containerEl, defaultText));
+                });
+                updateSummary(containerEl, defaultText);
+            };
+
             if (this.el.filterPalletId) {
                 const uniqueIds = [...new Set(allPallets.map(p => p.id).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
-                this.el.filterPalletId.innerHTML = uniqueIds.map(id => `<option value="${id}">${id}</option>`).join('');
-                if (Array.isArray(this.filters.palletId)) {
-                    Array.from(this.el.filterPalletId.options).forEach(opt => opt.selected = this.filters.palletId.includes(opt.value));
-                }
+                this.el.filterPalletId.innerHTML = uniqueIds.map(id => {
+                    const isChecked = Array.isArray(this.filters.palletId) && this.filters.palletId.includes(id.toString()) ? 'checked' : '';
+                    return `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${id}" ${isChecked}> ${id}</label>`;
+                }).join('');
+                bindCheckboxEvents(this.el.filterPalletId, this._t('Todos os Pallets'));
             }
 
             if (this.el.filterOp) {
                 const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
-                this.el.filterOp.innerHTML = uniqueOps.map(op => `<option value="${op}">${op}</option>`).join('');
-                if (Array.isArray(this.filters.op)) {
-                    Array.from(this.el.filterOp.options).forEach(opt => opt.selected = this.filters.op.includes(opt.value));
-                }
+                this.el.filterOp.innerHTML = uniqueOps.map(op => {
+                    const isChecked = Array.isArray(this.filters.op) && this.filters.op.includes(op.toString()) ? 'checked' : '';
+                    return `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${op}" ${isChecked}> ${op}</label>`;
+                }).join('');
+                bindCheckboxEvents(this.el.filterOp, this._t('Todas as OPs'));
             }
 
             if (this.el.filterItem) {
@@ -280,12 +298,11 @@ export function bindEvents() {
                 let itemsHtml = '';
                 Array.from(uniqueItemsMap.keys()).sort((a,b) => String(a).localeCompare(String(b))).forEach(code => {
                     const desc = uniqueItemsMap.get(code);
-                    itemsHtml += `<option value="${code}">${code} | ${desc}</option>`;
+                    const isChecked = Array.isArray(this.filters.item) && this.filters.item.includes(code.toString()) ? 'checked' : '';
+                    itemsHtml += `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${code}" ${isChecked}> ${code} | ${desc}</label>`;
                 });
                 this.el.filterItem.innerHTML = itemsHtml;
-                if (Array.isArray(this.filters.item)) {
-                    Array.from(this.el.filterItem.options).forEach(opt => opt.selected = this.filters.item.includes(opt.value));
-                }
+                bindCheckboxEvents(this.el.filterItem, this._t('Todos os Itens'));
             }
 
             if (this.el.filterDateStart) this.el.filterDateStart.value = this.filters.dateStart || '';
@@ -305,9 +322,21 @@ export function bindEvents() {
 
     if (this.el.clearFilterBtn) {
         this.el.clearFilterBtn.addEventListener('click', () => {
-            if (this.el.filterPalletId) Array.from(this.el.filterPalletId.options).forEach(o => o.selected = false);
-            if (this.el.filterOp) Array.from(this.el.filterOp.options).forEach(o => o.selected = false);
-            if (this.el.filterItem) Array.from(this.el.filterItem.options).forEach(o => o.selected = false);
+            if (this.el.filterPalletId) {
+                this.el.filterPalletId.querySelectorAll('input').forEach(cb => cb.checked = false);
+                const s = this.el.filterPalletId.parentElement.querySelector('.selected-text');
+                if(s) s.textContent = this._t('Todos os Pallets');
+            }
+            if (this.el.filterOp) {
+                this.el.filterOp.querySelectorAll('input').forEach(cb => cb.checked = false);
+                const s = this.el.filterOp.parentElement.querySelector('.selected-text');
+                if(s) s.textContent = this._t('Todas as OPs');
+            }
+            if (this.el.filterItem) {
+                this.el.filterItem.querySelectorAll('input').forEach(cb => cb.checked = false);
+                const s = this.el.filterItem.parentElement.querySelector('.selected-text');
+                if(s) s.textContent = this._t('Todos os Itens');
+            }
             if (this.el.filterDateStart) this.el.filterDateStart.value = '';
             if (this.el.filterDateEnd) this.el.filterDateEnd.value = '';
 
@@ -324,9 +353,9 @@ export function bindEvents() {
 
     if (this.el.applyFilterBtn) {
         this.el.applyFilterBtn.addEventListener('click', () => {
-            this.filters.palletId = this.el.filterPalletId ? Array.from(this.el.filterPalletId.selectedOptions).map(o => o.value) : [];
-            this.filters.op = this.el.filterOp ? Array.from(this.el.filterOp.selectedOptions).map(o => o.value) : [];
-            this.filters.item = this.el.filterItem ? Array.from(this.el.filterItem.selectedOptions).map(o => o.value) : [];
+            this.filters.palletId = this.el.filterPalletId ? Array.from(this.el.filterPalletId.querySelectorAll('input:checked')).map(cb => cb.value) : [];
+            this.filters.op = this.el.filterOp ? Array.from(this.el.filterOp.querySelectorAll('input:checked')).map(cb => cb.value) : [];
+            this.filters.item = this.el.filterItem ? Array.from(this.el.filterItem.querySelectorAll('input:checked')).map(cb => cb.value) : [];
             this.filters.dateStart = this.el.filterDateStart ? this.el.filterDateStart.value : '';
             this.filters.dateEnd = this.el.filterDateEnd ? this.el.filterDateEnd.value : '';
 

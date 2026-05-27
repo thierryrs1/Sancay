@@ -349,19 +349,37 @@ export function getPortalTemplate(t) {
                     </div>
                     <div class="modal-body" style="padding: 1.5rem !important; display: block !important;">
                         <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
-                            <label for="filter-pallet-id" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('ID do Pallet')} <span style="font-size: 0.7rem; font-weight: normal; color: #888;">(Ctrl para vários)</span></label>
-                            <select id="filter-pallet-id" multiple size="4" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; box-sizing: border-box !important; overflow-y: auto !important;">
-                            </select>
+                            <label style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('ID do Pallet')}</label>
+                            <details class="custom-dropdown" style="width: 100% !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; background: #f8fafc !important; cursor: pointer !important; position: relative !important;">
+                                <summary style="padding: 10px !important; font-size: 0.95rem !important; list-style: none !important; display: flex !important; justify-content: space-between !important; align-items: center !important;">
+                                    <span class="selected-text" style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${t('Todos os Pallets')}</span>
+                                    <span style="font-size: 0.8rem !important; color: var(--text-muted) !important;">▼</span>
+                                </summary>
+                                <div id="filter-pallet-id-container" style="max-height: 150px !important; overflow-y: auto !important; border-top: 1px solid var(--border-color) !important; background: #fff !important; padding: 8px !important; position: absolute !important; width: 100% !important; box-sizing: border-box !important; z-index: 10 !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; border-radius: 0 0 8px 8px !important;">
+                                </div>
+                            </details>
                         </div>
                         <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
-                            <label for="filter-op" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Ordem de Produção (OP)')} <span style="font-size: 0.7rem; font-weight: normal; color: #888;">(Ctrl para vários)</span></label>
-                            <select id="filter-op" multiple size="4" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; box-sizing: border-box !important; overflow-y: auto !important;">
-                            </select>
+                            <label style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Ordem de Produção (OP)')}</label>
+                            <details class="custom-dropdown" style="width: 100% !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; background: #f8fafc !important; cursor: pointer !important; position: relative !important;">
+                                <summary style="padding: 10px !important; font-size: 0.95rem !important; list-style: none !important; display: flex !important; justify-content: space-between !important; align-items: center !important;">
+                                    <span class="selected-text" style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${t('Todas as OPs')}</span>
+                                    <span style="font-size: 0.8rem !important; color: var(--text-muted) !important;">▼</span>
+                                </summary>
+                                <div id="filter-op-container" style="max-height: 150px !important; overflow-y: auto !important; border-top: 1px solid var(--border-color) !important; background: #fff !important; padding: 8px !important; position: absolute !important; width: 100% !important; box-sizing: border-box !important; z-index: 10 !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; border-radius: 0 0 8px 8px !important;">
+                                </div>
+                            </details>
                         </div>
                         <div class="form-group" style="margin-bottom: 1.25rem !important; display: block !important;">
-                            <label for="filter-item" style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Código ou Descrição do Item')} <span style="font-size: 0.7rem; font-weight: normal; color: #888;">(Ctrl para vários)</span></label>
-                            <select id="filter-item" multiple size="4" style="width: 100% !important; padding: 10px !important; border-radius: 8px !important; border: 1px solid var(--border-color) !important; background: #f8fafc !important; font-size: 0.95rem !important; box-sizing: border-box !important; overflow-y: auto !important;">
-                            </select>
+                            <label style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Código ou Descrição do Item')}</label>
+                            <details class="custom-dropdown" style="width: 100% !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; background: #f8fafc !important; cursor: pointer !important; position: relative !important;">
+                                <summary style="padding: 10px !important; font-size: 0.95rem !important; list-style: none !important; display: flex !important; justify-content: space-between !important; align-items: center !important;">
+                                    <span class="selected-text" style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${t('Todos os Itens')}</span>
+                                    <span style="font-size: 0.8rem !important; color: var(--text-muted) !important;">▼</span>
+                                </summary>
+                                <div id="filter-item-container" style="max-height: 150px !important; overflow-y: auto !important; border-top: 1px solid var(--border-color) !important; background: #fff !important; padding: 8px !important; position: absolute !important; width: 100% !important; box-sizing: border-box !important; z-index: 10 !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important; border-radius: 0 0 8px 8px !important;">
+                                </div>
+                            </details>
                         </div>
                         <div style="margin-bottom: 1.5rem !important; display: block !important;">
                             <label style="display: block !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; color: var(--text-muted) !important; margin-bottom: 6px !important; padding: 0 !important; text-align: left !important;">${t('Data de Criação (Período)')}</label>
