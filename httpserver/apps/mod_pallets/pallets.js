@@ -569,7 +569,7 @@ export async function openActivePallet(id) {
     try {
         document.getElementById('bs-loading').classList.remove('is-hidden');
 
-        const response = await fetch('http://192.168.30.14:9908/api/v1/getPallet', {
+        const response = await fetch('http://192.168.30.14:9908/api/v1/getPalletWithName', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ "U_SPS_PalletCode": p.id })
@@ -581,25 +581,10 @@ export async function openActivePallet(id) {
             p.docEntry = sapData.DocEntry;
             p.expectedQty = sapData.U_SPS_ExpectedQty;
 
-            if (!p.itemCode) {
-                const opParts = p.op.split('/');
-                const opDados = `@${opParts[0]}@@${opParts[1]}@`;
-
-                await new Promise((resolve) => {
-                    getData('getAux', 'getItem', opDados, (err, itemData) => {
-                        if (!err && itemData) {
-                            if (itemData.value && itemData.value[0]) {
-                                p.itemCode = itemData.value[0][0] || '';
-                                p.material = itemData.value[0][1] || ''; // A descrição do item!
-                            } else {
-                                const item = Array.isArray(itemData) ? itemData[0] : itemData;
-                                p.itemCode = item || '';
-                                p.material = '';
-                            }
-                        }
-                        resolve();
-                    });
-                });
+            // Pega o ItemName e ItemCode direto da nova API rápida (se já não estiver populado)
+            if (!p.itemCode && sapData.SPS_PALLET_GROUP_LCollection && sapData.SPS_PALLET_GROUP_LCollection.length > 0) {
+                p.itemCode = sapData.SPS_PALLET_GROUP_LCollection[0].U_SPS_ItemCode || '';
+                p.material = sapData.SPS_PALLET_GROUP_LCollection[0].ItemName || '';
             }
 
             if (sapData.SPS_PALLET_GROUP_LCollection) {
