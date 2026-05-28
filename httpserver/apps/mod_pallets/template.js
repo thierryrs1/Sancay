@@ -300,43 +300,119 @@ export function getPortalTemplate(t) {
 
             <!-- Pallet Details Modal -->
             <div id="pallet-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>${t('Detalhes do Pallet')}</h2>
-                        <button id="close-modal" class="close-btn">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="pallet-summary-mini">
-                            <div><span class="sancay-label">${t('OP')}:</span> <strong id="modal-op" class="sancay-value"></strong></div>
-                            <div><span class="sancay-label">${t('Material')}:</span> <strong id="modal-material" class="sancay-value"></strong></div>
-                            <div><span class="sancay-label">${t('Data/Hora')}:</span> <strong id="modal-date" class="sancay-value"></strong></div>
-                            <div class="mini-stats">
-                                <div class="mini-stat"><span>${t('Caixas')}</span><strong id="modal-boxes" class="sancay-value"></strong></div>
-                                <div class="mini-stat"><span>Peso Total</span><strong id="modal-weight" class="sancay-value"></strong></div>
+                <div class="modal-content" style="border-left: 8px solid #f97316 !important; border-radius: 12px !important; overflow: hidden !important;">
+                    <div class="modal-header" style="display: flex !important; align-items: flex-start !important; justify-content: space-between !important; padding: 1.5rem 1.5rem 0 1.5rem !important; border-bottom: none !important;">
+                        <div style="display: flex !important; align-items: center !important; gap: 16px !important;">
+                            <div style="width: 48px !important; height: 48px !important; background: #eff6ff !important; border-radius: 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #2563eb !important; border: 1px solid #bfdbfe !important;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            </div>
+                            <div style="display: flex !important; flex-direction: column !important; gap: 4px !important;">
+                                <h2 style="margin: 0 !important; font-size: 1.5rem !important; color: #0f172a !important; font-weight: 700 !important; letter-spacing: -0.02em !important;">${t('Detalhes do Pallet')}</h2>
+                                <div style="display: inline-flex !important; align-items: center !important; gap: 6px !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; padding: 4px 10px !important; border-radius: 16px !important; width: fit-content !important;">
+                                    <div id="modal-status-dot" style="width: 8px !important; height: 8px !important; border-radius: 50% !important; background: #f97316 !important;"></div>
+                                    <span id="modal-status-badge" style="font-size: 0.75rem !important; font-weight: 600 !important; color: #64748b !important; text-transform: uppercase !important; letter-spacing: 0.05em !important;">EM ANDAMENTO</span>
+                                </div>
                             </div>
                         </div>
+                        <button id="close-modal" class="close-btn" style="background: none !important; border: none !important; cursor: pointer !important; color: #64748b !important; font-size: 1.5rem !important; margin-top: -8px !important;">×</button>
+                    </div>
+                    <div class="modal-body" style="padding: 1.5rem !important; background: #ffffff !important;">
+                        
+                        <div style="display: flex !important; flex-direction: column !important; gap: 1rem !important; margin-bottom: 2rem !important;">
+                            <!-- Row 1: OP & Data -->
+                            <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 1rem !important;">
+                                <div style="border: 1px solid #f1f5f9 !important; border-radius: 8px !important; padding: 1rem !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;">
+                                    <div style="width: 40px !important; height: 40px !important; background: #eff6ff !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #3b82f6 !important;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    </div>
+                                    <div style="display: flex !important; flex-direction: column !important; gap: 2px !important;">
+                                        <span style="font-size: 0.75rem !important; font-weight: 500 !important; color: #64748b !important;">OP</span>
+                                        <strong id="modal-op" style="font-size: 0.95rem !important; color: #0f172a !important; font-weight: 600 !important;"></strong>
+                                    </div>
+                                </div>
+                                <div style="border: 1px solid #f1f5f9 !important; border-radius: 8px !important; padding: 1rem !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;">
+                                    <div style="width: 40px !important; height: 40px !important; background: #eff6ff !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #3b82f6 !important;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                    </div>
+                                    <div style="display: flex !important; flex-direction: column !important; gap: 2px !important;">
+                                        <span style="font-size: 0.75rem !important; font-weight: 500 !important; color: #64748b !important;">Data/Hora de Início</span>
+                                        <strong id="modal-date" style="font-size: 0.95rem !important; color: #0f172a !important; font-weight: 600 !important;"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 2: Material -->
+                            <div style="border: 1px solid #f1f5f9 !important; border-radius: 8px !important; padding: 1rem !important; display: flex !important; align-items: flex-start !important; gap: 12px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;">
+                                <div style="width: 40px !important; height: 40px !important; background: #eff6ff !important; border-radius: 8px !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #3b82f6 !important; flex-shrink: 0 !important;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                </div>
+                                <div style="display: flex !important; flex-direction: column !important; gap: 2px !important;">
+                                    <span style="font-size: 0.75rem !important; font-weight: 500 !important; color: #64748b !important;">Material</span>
+                                    <strong id="modal-material" style="font-size: 0.95rem !important; color: #0f172a !important; font-weight: 600 !important; line-height: 1.4 !important; text-transform: uppercase !important;"></strong>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 3: Totals -->
+                            <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 1rem !important;">
+                                <!-- Caixas -->
+                                <div style="background: #f8fafc !important; border: 1px solid #f1f5f9 !important; border-radius: 12px !important; padding: 1.25rem !important; display: flex !important; flex-direction: column !important; gap: 12px !important; position: relative !important; overflow: hidden !important;">
+                                    <div style="position: absolute !important; right: -10px !important; top: -10px !important; bottom: -10px !important; width: 80px !important; background-image: radial-gradient(#cbd5e1 2px, transparent 2px) !important; background-size: 10px 10px !important; opacity: 0.6 !important; mask-image: linear-gradient(to right, transparent, black) !important; -webkit-mask-image: linear-gradient(to right, transparent, black) !important;"></div>
+                                    <div style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                                        <div style="width: 32px !important; height: 32px !important; background: #ffffff !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #2563eb !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                        </div>
+                                        <span style="font-size: 0.85rem !important; font-weight: 600 !important; color: #2563eb !important;">Total de Caixas</span>
+                                    </div>
+                                    <div style="display: flex !important; flex-direction: column !important; position: relative !important; z-index: 2 !important;">
+                                        <strong id="modal-boxes" style="font-size: 3.5rem !important; font-weight: 700 !important; color: #1d4ed8 !important; line-height: 1 !important; letter-spacing: -0.03em !important;"></strong>
+                                        <span style="font-size: 0.85rem !important; font-weight: 500 !important; color: #64748b !important;">caixas</span>
+                                    </div>
+                                </div>
+                                <!-- Peso -->
+                                <div style="background: #f0fdf4 !important; border: 1px solid #dcfce7 !important; border-radius: 12px !important; padding: 1.25rem !important; display: flex !important; flex-direction: column !important; gap: 12px !important; position: relative !important; overflow: hidden !important;">
+                                    <div style="position: absolute !important; right: -10px !important; top: -10px !important; bottom: -10px !important; width: 80px !important; background-image: radial-gradient(#86efac 2px, transparent 2px) !important; background-size: 10px 10px !important; opacity: 0.6 !important; mask-image: linear-gradient(to right, transparent, black) !important; -webkit-mask-image: linear-gradient(to right, transparent, black) !important;"></div>
+                                    <div style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                                        <div style="width: 32px !important; height: 32px !important; background: #ffffff !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #16a34a !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                        </div>
+                                        <span style="font-size: 0.85rem !important; font-weight: 600 !important; color: #16a34a !important;">Peso Total</span>
+                                    </div>
+                                    <div style="display: flex !important; flex-direction: column !important; position: relative !important; z-index: 2 !important;">
+                                        <strong id="modal-weight" style="font-size: 3.5rem !important; font-weight: 700 !important; color: #15803d !important; line-height: 1 !important; letter-spacing: -0.03em !important;"></strong>
+                                        <span style="font-size: 0.85rem !important; font-weight: 500 !important; color: #64748b !important;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="boxes-table-container">
-                            <h4>${t('Lista de Caixas')}</h4>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th class="sancay-th">#</th>
-                                        <th class="sancay-th">${t('Data/Hora')}</th>
-                                        <th class="sancay-th">${t('Peso')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="modal-boxes-list"></tbody>
-                            </table>
+                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 1rem !important;">
+                                <h4 style="margin: 0 !important; font-size: 1.1rem !important; color: #0f172a !important; font-weight: 600 !important;">Lista de Caixas</h4>
+                                <span id="modal-boxes-badge" style="background: #f1f5f9 !important; color: #475569 !important; padding: 6px 12px !important; border-radius: 6px !important; font-size: 0.8rem !important; font-weight: 500 !important; border: 1px solid #e2e8f0 !important;"></span>
+                            </div>
+                            <div style="background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; overflow: hidden !important;">
+                                <table style="width: 100% !important; border-collapse: collapse !important; margin: 0 !important;">
+                                    <thead style="background: #ffffff !important; border-bottom: 1px solid #e2e8f0 !important;">
+                                        <tr>
+                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: left !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">#</th>
+                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: center !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">Data/Hora</th>
+                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: center !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">Peso (kg)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modal-boxes-list"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; width: 100%;">
-                        <select id="print-language" class="sancay-input" style="width: 140px; margin-right: auto; margin-bottom: 0;">
-                            <option value="PTB">Português</option>
-                            <option value="EN">English</option>
-                            <option value="ES">Español</option>
-                        </select>
-                        <button id="edit-pallet-btn" class="btn primary">${t('Continuar Pallet')}</button>
-                        <button id="print-pallet-btn" class="btn outline">${t('Imprimir Etiqueta')}</button>
+                    <div class="modal-footer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; padding: 1.5rem !important; border-top: 1px solid #e2e8f0 !important; background: #ffffff !important; border-radius: 0 0 12px 12px !important;">
+                        <button id="print-pallet-btn" class="btn outline" style="border: 1px solid #cbd5e1 !important; color: #1d4ed8 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; padding: 12px 24px !important; font-weight: 600 !important; border-radius: 8px !important; background: transparent !important; cursor: pointer !important; transition: background 0.2s !important;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Imprimir Etiqueta
+                        </button>
+                        <button id="edit-pallet-btn" class="btn primary" style="background: #1d4ed8 !important; color: #ffffff !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; padding: 12px 24px !important; font-weight: 600 !important; border-radius: 8px !important; border: none !important; cursor: pointer !important; transition: opacity 0.2s !important;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            Continuar Pallet
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
                     </div>
                 </div>
             </div>

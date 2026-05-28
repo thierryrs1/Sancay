@@ -218,7 +218,7 @@ export function updateProcessView() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted) !important;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                </div>`
             : `<button class="delete-box-btn" onclick="deleteBox(${actualIndex})" style="background: none !important; border: none !important; color: #ef4444 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'" title="${this._t('Excluir Caixa')}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2-2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                </button>`;
 
         const printHtml = `<button class="print-box-btn" onclick="printBoxLabel('${this.currentPallet.docEntry}', '${box.lineId || actualIndex + 1}')" style="background: none !important; border: none !important; color: #3b82f6 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3b82f6'" title="${this._t('Imprimir Etiqueta da Caixa')}">
@@ -618,8 +618,7 @@ export async function printPallet(p) {
         return;
     }
 
-    const langSelect = document.getElementById('print-language');
-    const lang = langSelect ? langSelect.value : 'PTB';
+    const lang = this.userSettings.language || 'PTB';
     const params = `@${p.id}@@${lang}@`;
 
     document.getElementById('bs-loading').classList.remove('is-hidden');

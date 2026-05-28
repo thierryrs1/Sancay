@@ -885,13 +885,38 @@ export function openPalletDetails(id) {
     } catch (e) { }
     document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
-    document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+    document.getElementById('modal-boxes-badge').textContent = `${p.boxes.length} caixas`;
+    document.getElementById('modal-weight').textContent = p.totalWeight.toFixed(2);
+    
+    // Configura o status badge inicial (se tiver status)
+    if (p.status) {
+        document.getElementById('modal-status-badge').textContent = p.status;
+        document.getElementById('modal-status-dot').style.background = p.status === 'ENCERRADO' ? '#22c55e' : '#f97316';
+    }
 
     const renderList = () => {
         document.getElementById('modal-boxes-list').innerHTML = p.boxes.map((b, i) => {
             const timeStr = formatBoxDateTime(b);
             const weightStr = typeof b.weight === 'number' ? `${b.weight.toFixed(2)} kg` : '---';
-            return `<tr><td class="sancay-td">${i + 1}</td><td class="sancay-td">${timeStr}</td><td class="sancay-td"><strong class="sancay-value">${weightStr}</strong></td></tr>`;
+            
+            const printHtml = b.lineId 
+                ? `<button class="print-box-btn" onclick="printBoxLabel('${p.docEntry}', '${b.lineId}')" style="background: none !important; border: none !important; color: #1d4ed8 !important; cursor: pointer !important; padding: 4px !important; transition: opacity 0.2s !important;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="${this._t('Imprimir Etiqueta da Caixa')}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                   </button>` 
+                : '';
+
+            return `<tr style="border-bottom: 1px solid #e2e8f0 !important; background: transparent !important; transition: background 0.2s !important;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                <td class="sancay-td" style="padding: 12px 16px !important; font-weight: 600 !important; color: #1e293b !important; font-size: 0.95rem !important;">${b.code || (i + 1)}</td>
+                <td class="sancay-td" style="padding: 12px 16px !important; color: #475569 !important; font-size: 0.95rem !important; text-align: center !important;">${timeStr}</td>
+                <td class="sancay-td" style="padding: 12px 16px !important; position: relative !important;">
+                    <div style="display:flex; align-items:center; justify-content: center;">
+                        <span style="font-size: 0.95rem !important; color: #475569 !important; font-weight: 500 !important;">${weightStr.replace(' kg', '')}</span>
+                    </div>
+                    <div style="position: absolute !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) !important; display: flex !important;">
+                        ${printHtml}
+                    </div>
+                </td>
+            </tr>`;
         }).join('');
     };
 
@@ -915,6 +940,7 @@ export function openPalletDetails(id) {
                         .filter(l => l.U_SPS_Status !== 'REMOVIDO')
                         .map(l => ({
                             lineId: l.LineId,
+                            code: l.U_SPS_BoxCode,
                             weight: parseFloat(l.U_SPS_BoxWeight || 0),
                             time: l.U_SPS_CreateDate,
                             status: l.U_SPS_Status || 'EMPESAGEM',
@@ -923,7 +949,12 @@ export function openPalletDetails(id) {
                         }));
                     p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
                     document.getElementById('modal-boxes').textContent = p.boxes.length;
-                    document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+                    document.getElementById('modal-boxes-badge').textContent = `${p.boxes.length} caixas`;
+                    document.getElementById('modal-weight').textContent = p.totalWeight.toFixed(2);
+                    if (p.status) {
+                        document.getElementById('modal-status-badge').textContent = p.status;
+                        document.getElementById('modal-status-dot').style.background = p.status === 'ENCERRADO' ? '#22c55e' : '#f97316';
+                    }
                 }
             }
             renderList();
