@@ -1,113 +1,60 @@
 import { getData, serviceLayerPost, serviceLayerGet } from './api.js';
 import { formatBoxDateTime } from './interface.js';
 
-export function fetchPendingPallets() {
+export async function fetchPendingPallets() {
     const _this = this;
-    getData('getAux', 'getPalletsPendentes&dg_limit=1000', '', (err, data) => {
-        if (err) {
-            console.error('Erro ao buscar pallets pendentes:', err);
-            _this.sapActivePallets = _this.pallets.filter(p => p.status === 'Em processo');
-            _this.renderDashboard();
-            _this.updateStats();
-            return;
-        }
+    try {
+        const response = await fetch('http://192.168.30.14:9908/api/v1/getWorkorderPallets');
+        if (!response.ok) throw new Error('API request failed');
+        const data = await response.json();
 
-        const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
-
-        // Buscar ordens de produção da Service Layer para ver quais estão abertas (Closed eq false)
-        serviceLayerGet('/odata4/v1/WorkorderPos?$filter=Closed eq false', {}, (errWo, woData) => {
-            let openOPs = new Set();
-            if (!errWo && woData && Array.isArray(woData.value)) {
-                woData.value.forEach(item => {
-                    openOPs.add(`${item.DocEntry}/${item.LineNumber}`.replace(/\s+/g, ''));
-                });
-            } else if (errWo) {
-                console.error('Erro ao buscar ordens de produção da Service Layer:', errWo);
-            }
-
-            // Mapear os pallets básicos do SAP
-            const mappedPallets = sapPallets.map(p => {
-                const startTime = p[4] || p.CreateDate;
-                let formattedTime = '---';
-                try {
-                    if (startTime) {
-                        const dateObj = new Date(startTime.replace(' ', 'T')); // Garante formato ISO
-                        if (!isNaN(dateObj)) formattedTime = dateObj.toLocaleTimeString();
-                    }
-                } catch (e) { console.warn('Data inválida:', startTime); }
-
-                return {
-                    id: p[0] || p.U_SPS_PalletCode,
-                    op: p[1] || p.U_SPS_OPCode,
-                    material: '',
-                    status: 'Em processo',
-                    displayTime: formattedTime,
-                    startTime: startTime,
-                    boxes: Array(parseInt(p[2] || p.Caixas || 0)).fill({}),
-                    totalWeight: parseFloat(p[3] || p.Peso || 0),
-                    itemCode: ''
-                };
-            });
-
-            // Filtrar os que possuem OP aberta (se a lista falhar por erro de rede, mantém todos por segurança)
-            const filteredPallets = mappedPallets.filter(pallet => {
-                if (!pallet.op) return true;
-                const cleanOP = pallet.op.toString().replace(/\s+/g, '');
-                if (errWo) return true; // Falha segura: mostra tudo se a API de OPs cair
-                return openOPs.has(cleanOP);
-            });
-
-            // Buscar o itemCode de forma dinâmica para cada pallet
-            const promises = filteredPallets.map(pallet => {
-                return new Promise((resolve) => {
-                    // Tenta achar localmente na lista carregada
-                    const localOP = _this.productionOrders && _this.productionOrders.find(o => {
-                        const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
-                        const opB = pallet.op.toString().replace(/\s+/g, '');
-                        return opA === opB;
-                    });
-
-                    if (localOP) {
-                        pallet.itemCode = localOP[2];
-                        pallet.material = localOP[3] || '';
-                        resolve();
-                    } else {
-                        // Busca direto no SAP/Beas se não encontrar local
-                        const opParts = pallet.op.split('/');
-                        if (opParts.length === 2) {
-                            const opDados = `@${opParts[0]}@@${opParts[1]}@`;
-                            getData('getAux', 'getItem', opDados, (err, itemData) => {
-                                if (!err && itemData) {
-                                    if (itemData.value && itemData.value[0]) {
-                                        pallet.itemCode = itemData.value[0][0] || '';
-                                        pallet.material = itemData.value[0][1] || ''; // a segunda coluna!
-                                    } else {
-                                        const item = Array.isArray(itemData) ? itemData[0] : itemData;
-                                        pallet.itemCode = item || '';
-                                        pallet.material = '';
-                                    }
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    }
-                });
-            });
-
-            // Espera todos os itemCodes serem resolvidos para renderizar a tela
-            Promise.all(promises).then(() => {
-                if (!window.app) window.app = {};
-                if (!window.app.appData) window.app.appData = {};
-                window.app.appData.pendingPallets = filteredPallets;
-
-                _this.sapActivePallets = filteredPallets;
-                _this.renderDashboard();
-                _this.updateStats();
-            });
+        const allPallets = data.map(p => {
+            const opCode = (p.BELNR_ID && p.BELPOS_ID) ? `${p.BELNR_ID}/${p.BELPOS_ID}` : '';
+            const rawStartTime = p.CreateDate || '';
+            const rawEndTime = p.CloseDate || '';
+            
+            // Tenta formatar a data, ou usa a original se falhar
+            let formattedStartTime = rawStartTime;
+            let formattedEndTime = rawEndTime;
+            
+            return {
+                id: (p.PalletCode || "").toString().replace(/^Pallet\s*#?/, ""),
+                docEntry: p.DocEntry,
+                op: opCode,
+                itemCode: p.ItemCode || '',
+                material: p.ItemName || '',
+                status: p.PalletStatus ? p.PalletStatus.toString().toUpperCase() : 'ABERTO',
+                displayTime: formattedStartTime,
+                startTime: rawStartTime,
+                endTime: rawEndTime,
+                boxes: Array(parseInt(p.BoxesCount || 0)).fill({}),
+                totalWeight: parseFloat(p.TotalWeight || 0),
+                expectedQty: parseFloat(p.U_SPS_ExpectedQty || 0),
+                distNumber: p.DistNumber || ''
+            };
         });
-    });
+
+        // Filtrar e alimentar as listas globais
+        _this.sapActivePallets = allPallets.filter(p => p.status === 'ABERTO' || p.status === 'EM PROCESSO');
+        _this.sapClosedPallets = allPallets.filter(p => p.status === 'FINALIZADO');
+
+        if (!window.app) window.app = {};
+        if (!window.app.appData) window.app.appData = {};
+        window.app.appData.pendingPallets = _this.sapActivePallets;
+
+        _this.renderDashboard();
+        _this.updateStats();
+        _this.renderHistory();
+
+    } catch (err) {
+        console.error('Erro ao buscar pallets da nova API unificada:', err);
+        // Fallbacks de segurança em caso de erro na API
+        _this.sapActivePallets = _this.pallets.filter(p => p.status === 'Em processo');
+        _this.sapClosedPallets = _this.pallets.filter(p => p.status === 'Finalizado');
+        _this.renderDashboard();
+        _this.updateStats();
+        _this.renderHistory();
+    }
 }
 
 export function fetchProductionOrders() {
@@ -809,122 +756,8 @@ export function reopenPallet() {
 }
 
 export function fetchClosedPallets() {
-    const _this = this;
-    getData('getAux', 'getPalletsFinalizados&dg_limit=1000', '', (err, data) => {
-        if (err) {
-            console.error('Erro ao buscar pallets finalizados:', err);
-            _this.sapClosedPallets = _this.pallets.filter(p => p.status === 'Finalizado');
-            _this.renderHistory();
-            return;
-        }
-
-        const sapPallets = (data && data.value) ? data.value : (Array.isArray(data) ? data : [data]);
-
-        // Mapear os pallets básicos do SAP
-        const mappedPallets = sapPallets.map(p => {
-            let p_status = 'FINALIZADO';
-            let endTime = '';
-            let opCode = '';
-            let caixasCount = 0;
-            let pesoTotal = 0;
-            let palletId = '';
-
-            if (Array.isArray(p)) {
-                palletId = p[0] || '';
-                endTime = p[1] || '';
-                opCode = p[2] || '';
-                caixasCount = parseInt(p[3]) || 0;
-                pesoTotal = parseFloat(p[4]) || 0;
-                if (p[5]) p_status = p[5].toString().toUpperCase();
-            } else {
-                // Fallback caso venha como objeto (segurança)
-                palletId = p.U_SPS_PalletCode || p.id || '';
-                opCode = p.U_SPS_OPCode || p.op || '';
-                endTime = p.U_SPS_CreateDate || p.CreateDate || '';
-                caixasCount = parseInt(p.Caixas || 0);
-                pesoTotal = parseFloat(p.Peso || 0);
-                p_status = p.U_SPS_Status || p.Status || 'FINALIZADO';
-            }
-
-            let formattedTime = '---';
-            if (endTime) {
-                const endStr = endTime.toString().trim();
-                // Verifica formato YYYY-MM-DD HH:MM:SS
-                if (endStr.includes('-') && endStr.includes(':')) {
-                    const [dPart, tPart] = endStr.split(' ');
-                    const [y, m, d] = dPart.split('-');
-                    const [h, min] = tPart ? tPart.split(':') : ['00', '00'];
-                    formattedTime = `${d}/${m}/${y} ${h}:${min}`;
-                } else if (endStr.includes('/')) {
-                    // Tenta formatar se já vier com /
-                    formattedTime = endStr;
-                } else {
-                    formattedTime = endStr;
-                }
-            }
-
-            return {
-                id: palletId,
-                op: opCode,
-                material: '',
-                status: p_status,
-                displayTime: formattedTime,
-                endTime: endTime,
-                boxes: Array(caixasCount).fill({}),
-                totalWeight: pesoTotal,
-                itemCode: ''
-            };
-        });
-
-        // Buscar o itemCode de forma dinâmica para cada pallet
-        const promises = mappedPallets.map(pallet => {
-            return new Promise((resolve) => {
-                // Tenta achar localmente na lista carregada
-                const localOP = _this.productionOrders && _this.productionOrders.find(o => {
-                    const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
-                    const opB = pallet.op.toString().replace(/\s+/g, '');
-                    return opA === opB;
-                });
-
-                if (localOP) {
-                    pallet.itemCode = localOP[2];
-                    pallet.material = localOP[3] || '';
-                    resolve();
-                } else {
-                    // Busca direto no SAP/Beas se não encontrar local
-                    const opParts = pallet.op.split('/');
-                    if (opParts.length === 2) {
-                        const opDados = `@${opParts[0]}@@${opParts[1]}@`;
-                        getData('getAux', 'getItem', opDados, (err, itemData) => {
-                            if (!err && itemData) {
-                                if (itemData.value && itemData.value[0]) {
-                                    pallet.itemCode = itemData.value[0][0] || '';
-                                    pallet.material = itemData.value[0][1] || ''; // a segunda coluna!
-                                } else {
-                                    const item = Array.isArray(itemData) ? itemData[0] : itemData;
-                                    pallet.itemCode = item || '';
-                                    pallet.material = '';
-                                }
-                            }
-                            resolve();
-                        });
-                    } else {
-                        resolve();
-                    }
-                }
-            });
-        });
-
-        // Espera todos os itemCodes serem resolvidos para renderizar a tela
-        Promise.all(promises).then(() => {
-            if (!window.app) window.app = {};
-            if (!window.app.appData) window.app.appData = {};
-            window.app.appData.closedPallets = mappedPallets;
-
-            _this.sapClosedPallets = mappedPallets;
-            _this.renderHistory();
-        });
-    });
+    // Desativado: Os pallets fechados agora são carregados e renderizados na mesma requisição inicial (fetchPendingPallets)
+    // para maximizar o desempenho e reaproveitar a API getWorkorderPallets.
 }
 
 export function printBoxLabel(docEntry, lineId) {

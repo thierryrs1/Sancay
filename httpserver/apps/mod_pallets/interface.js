@@ -574,47 +574,105 @@ export function renderDashboard() {
             : (material || 'Sem descrição');
 
         return `
-            <div class="pallet-card" onclick="openActivePallet('${p.id}')">
-                <!-- Top Header: ID e Status -->
-                <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 0.75rem !important; padding: 0 !important;">
-                    <div style="display: flex !important; align-items: center !important; gap: 8px !important; margin: 0 !important; padding: 0 !important;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 !important; padding: 0 !important;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        <span style="font-size: 1.4rem !important; font-weight: 800 !important; color: var(--text-strong) !important; letter-spacing: -0.01em !important; margin: 0 !important; padding: 0 !important;">Pallet #${p.id}</span>
+            <div class="pallet-card" onclick="openActivePallet('${p.id}')" style="display: flex; flex-direction: column; gap: 16px; padding: 24px !important; background: #ffffff !important; border-radius: 16px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02) !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #f1f5f9 !important; height: 100% !important; min-height: 100% !important;">
+
+                <!-- Top Section -->
+                <div style="display: flex !important; align-items: flex-start !important; gap: 16px !important; margin: 0 !important; padding: 0 16px !important; height: 72px !important; box-sizing: border-box !important;">
+                    
+                    <!-- Icon Container -->
+                    <div style="width: 40px !important; height: 40px !important; border-radius: 10px !important; background: #eff6ff !important; border: 1px solid #bfdbfe !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="10" width="7" height="6" />
+                            <rect x="13" y="10" width="7" height="6" />
+                            <rect x="8.5" y="4" width="7" height="6" />
+                            <path d="M3 18h18 M5 18v2 M12 18v2 M19 18v2" />
+                        </svg>
                     </div>
-                    <span class="badge" style="${statusBadgeStyle}">${statusLabel}</span>
-                </div>
 
-                <!-- Criado em (Data e Hora) -->
-                <div style="font-size: 0.85rem !important; color: var(--text-muted) !important; margin-bottom: 1.5rem !important; display: flex !important; align-items: center !important; gap: 6px !important; padding: 0 !important; margin-top: 0 !important;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted) !important; margin: 0 !important; padding: 0 !important;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span style="margin: 0 !important; padding: 0 !important;">Criado em: <strong style="color: var(--text-normal) !important; font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important;">${fullDateTimeStr}</strong></span>
-                </div>
-
-                <!-- Seção Produto (Código | Descrição) -->
-                <div style="background: #f8fafc !important; border: 1px solid var(--border-color) !important; padding: 1.25rem !important; border-radius: var(--radius-md) !important; margin-bottom: 1.5rem !important; display: block !important; margin-top: 0 !important;">
-                    <p style="font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 8px !important; padding: 0 !important; margin-top: 0 !important; display: block !important; line-height: 1 !important;">Produto</p>
-                    <p style="font-size: 1rem !important; font-weight: 700 !important; color: var(--text-strong) !important; line-height: 1.4 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 !important; padding: 0 !important; display: block !important;" title="${prodDisplay}">
-                        ${prodDisplay}
-                    </p>
-                </div>
-
-                <!-- Info Grid: OP e Peso Lado a Lado -->
-                <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 2rem !important; padding: 0 4px !important; margin-top: 0 !important;">
-                    <div style="margin: 0 !important; padding: 0 !important; display: block !important; text-align: left !important;">
-                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 8px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Ordem de Produção</span>
-                        <span style="font-family: 'JetBrains Mono', monospace !important; font-size: 0.95rem !important; font-weight: 700 !important; color: var(--primary) !important; background: rgba(37, 99, 235, 0.06) !important; padding: 6px 12px !important; border-radius: 6px !important; border: 1px solid rgba(37, 99, 235, 0.12) !important; display: inline-block !important; margin: 0 !important;">
-                            OP ${p.op}
-                        </span>
-                    </div>
-                    <div style="text-align: right !important; margin: 0 !important; padding: 0 !important; display: block !important;">
-                        <span style="display: block !important; font-size: 0.75rem !important; text-transform: uppercase !important; font-weight: 700 !important; color: var(--text-muted) !important; letter-spacing: 0.05em !important; margin-bottom: 6px !important; padding: 0 !important; margin-top: 0 !important; line-height: 1 !important;">Caixas Registradas</span>
-                        <strong style="font-size: 1.8rem !important; font-weight: 800 !important; color: var(--text-strong) !important; margin: 0 !important; padding: 0 !important; display: inline-block !important; line-height: 1 !important;">${p.boxes ? p.boxes.length : 0} <span style="font-size: 1.05rem !important; font-weight: 600 !important; color: var(--text-muted) !important;">CX</span></strong>
+                    <!-- Info -->
+                    <div style="flex: 1 !important; margin: 0 !important; padding: 0 !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important; gap: 4px !important;">
+                        <!-- Row 1: ID and Badge -->
+                        <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 8px !important; margin: 0 !important; padding: 0 !important;">
+                            <div style="font-size: 1.1rem !important; font-weight: 800 !important; color: #0f172a !important; line-height: 1.1 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${p.id}</div>
+                            <div style="flex-shrink: 0 !important; margin: 0 !important; padding: 0 !important;">
+                                <span style="${statusBadgeStyle} padding: 4px 8px !important; border-radius: 20px !important; font-size: 0.65rem !important; font-weight: 700 !important; letter-spacing: 0.05em !important; display: inline-flex !important; align-items: center !important; gap: 4px !important; text-transform: uppercase !important; box-shadow: none !important;">
+                                    <span style="width: 6px !important; height: 6px !important; border-radius: 50% !important; background: currentColor !important;"></span>
+                                    ${statusLabel}
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Row 2: Date -->
+                        <div style="font-size: 0.8rem !important; color: #64748b !important; margin-top: 2px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">Criado em: <span style="color: #475569 !important; font-weight: 500 !important;">${fullDateTimeStr}</span></div>
+                        <!-- Row 3: Lote -->
+                        ${p.distNumber ? `
+                        <div style="font-size: 0.8rem !important; color: #64748b !important; margin-top: 2px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">Lote: <span style="color: #475569 !important; font-weight: 600 !important;">${p.distNumber}</span></div>` : ''}
                     </div>
                 </div>
 
-                <button class="btn primary">
+                <!-- Divider -->
+                <hr style="border: 0 !important; height: 1px !important; background: #e2e8f0 !important; margin: 0 !important; padding: 0 !important;">
+
+                <!-- Product Section -->
+                <div style="background: #f8fafc !important; border: 1px solid #f1f5f9 !important; border-radius: 12px !important; padding: 16px !important; display: flex !important; gap: 16px !important; align-items: center !important; margin: 0 !important; height: 76px !important; box-sizing: border-box !important;">
+                    <div style="width: 40px !important; height: 40px !important; border-radius: 10px !important; background: #eff6ff !important; border: 1px solid #dbeafe !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div style="margin: 0 !important; padding: 0 !important; min-width: 0 !important;">
+                        <div style="font-size: 0.7rem !important; color: #64748b !important; font-weight: 700 !important; letter-spacing: 0.05em !important; margin-bottom: 2px !important;">PRODUTO</div>
+                        <div style="font-size: 0.95rem !important; color: #0f172a !important; font-weight: 800 !important; line-height: 1.2 !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;">
+                            ${itemCode ? `<span style="color: #334155 !important; font-weight: 600 !important; margin-right: 4px !important;">${itemCode} |</span>` : ''}${material || 'Sem descrição'}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Section -->
+                <div style="background: #f8fafc !important; border: 1px solid #f1f5f9 !important; border-radius: 12px !important; display: flex !important; align-items: center !important; margin: 0 !important; padding: 0 !important;">
+                    <!-- Caixas -->
+                    <div style="flex: 1 !important; padding: 16px !important; display: flex !important; gap: 16px !important; align-items: center !important; margin: 0 !important;">
+                        <div style="width: 40px !important; height: 40px !important; border-radius: 10px !important; background: #eff6ff !important; border: 1px solid #dbeafe !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <div style="margin: 0 !important; padding: 0 !important;">
+                            <div style="font-size: 0.7rem !important; color: #64748b !important; font-weight: 700 !important; letter-spacing: 0.05em !important; margin-bottom: 2px !important;">CAIXAS</div>
+                            <div style="display: flex !important; align-items: baseline !important; gap: 4px !important; margin: 0 !important; padding: 0 !important;">
+                                <div style="font-size: 1.8rem !important; color: #0f172a !important; font-weight: 800 !important; line-height: 1 !important;">${p.boxes ? p.boxes.length : 0}</div>
+                                <div style="font-size: 0.9rem !important; color: #64748b !important; font-weight: 600 !important;">/ ${p.expectedQty > 0 ? p.expectedQty : '-'} CX</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vertical Divider -->
+                    <div style="width: 1px !important; height: 50px !important; background: #e2e8f0 !important; margin: 0 !important; padding: 0 !important;"></div>
+
+                    <!-- Peso -->
+                    <div style="flex: 1 !important; padding: 16px !important; display: flex !important; gap: 16px !important; align-items: center !important; margin: 0 !important;">
+                        <div style="width: 40px !important; height: 40px !important; border-radius: 10px !important; background: #eff6ff !important; border: 1px solid #dbeafe !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="5" r="3"></circle>
+                            <path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.46A2 2 0 0 0 17.5 8Z"></path>
+                        </svg>
+                        </div>
+                        <div style="margin: 0 !important; padding: 0 !important;">
+                            <div style="font-size: 0.7rem !important; color: #64748b !important; font-weight: 700 !important; letter-spacing: 0.05em !important; margin-bottom: 2px !important;">PESO</div>
+                            <div style="display: flex !important; align-items: baseline !important; gap: 4px !important; margin: 0 !important; padding: 0 !important;">
+                                <div style="font-size: 1.8rem !important; color: #0f172a !important; font-weight: 800 !important; line-height: 1 !important;">${(p.totalWeight || 0).toFixed(2)}</div>
+                                <div style="font-size: 0.9rem !important; color: #64748b !important; font-weight: 600 !important;">kg</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <button class="btn primary" style="width: 100% !important; justify-content: center !important; border-radius: 12px !important; padding: 14px !important; font-size: 1.05rem !important; font-weight: 600 !important; margin-top: auto !important; margin-bottom: 0 !important;">
                     <span>${this._t('Continuar')}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px !important;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
             </div>
         `;
