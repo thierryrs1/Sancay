@@ -106,6 +106,7 @@ export class SancayPortal {
         window.openActivePallet = (id) => this.openActivePallet(id);
         window.openPalletDetails = (id) => this.openPalletDetails(id);
         window.deleteBox = (idx) => this.deleteBox(idx);
+        window.printBoxLabel = (docEntry, lineId) => this.printBoxLabel(docEntry, lineId);
         
         window.handleHeaderDblClick = (columnId) => this.handleHistorySort(columnId);
         window.toggleFilterDropdown = (event, columnId) => this.toggleHistoryFilterDropdown(event, columnId);
