@@ -19,7 +19,7 @@ export function formatBoxDateTime(b) {
     const formatT = (tVal) => {
         if (tVal === undefined || tVal === null || tVal === '') return '';
         const tStr = tVal.toString().trim();
-        
+
         // Se já vier com dois pontos (ex: "07:05" ou "07:05:00" do Service Layer)
         if (tStr.includes(':')) {
             const parts = tStr.split(':');
@@ -27,7 +27,7 @@ export function formatBoxDateTime(b) {
             const m = parts[1].padStart(2, '0');
             return `${h}:${m}`;
         }
-        
+
         // Se for inteiro (ex: 705 ou 1312)
         let val = parseInt(tStr);
         if (isNaN(val)) return '';
@@ -215,7 +215,7 @@ export function bindEvents() {
         this.el.simulateWeightBtn.addEventListener('click', () => this.simulateWeight());
     }
     this.el.registerBoxBtn.addEventListener('click', () => this.registerBox());
-    
+
     if (this.el.tareBtn) {
         this.el.tareBtn.addEventListener('click', () => {
             if (this.scaleManualMode) {
@@ -227,7 +227,7 @@ export function bindEvents() {
                 this.el.tareInfo.style.display = 'block';
                 this.el.tareValue.textContent = this.scaleTare.toFixed(3);
                 this.showToast(this._t('Tara registrada!'));
-                
+
                 // Atualiza a tela imediatamente descontando a tara
                 const netWeight = Math.max(0, this.currentGrossWeight - this.scaleTare);
                 if (this.el.liveWeightDisplay) {
@@ -245,7 +245,7 @@ export function bindEvents() {
             this.scaleTare = 0;
             this.el.tareInfo.style.display = 'none';
             this.showToast(this._t('Tara removida!'));
-            
+
             // Retorna a exibir o peso bruto
             if (this.el.liveWeightDisplay) {
                 this.el.liveWeightDisplay.textContent = this.currentGrossWeight ? this.currentGrossWeight.toFixed(3) : '0.000';
@@ -292,15 +292,15 @@ export function bindEvents() {
             const allPallets = (window.app && window.app.appData && window.app.appData.pendingPallets) ? window.app.appData.pendingPallets : (this.sapActivePallets || []);
 
             const updateSummary = (containerEl, defaultText) => {
-                if(!containerEl) return;
+                if (!containerEl) return;
                 const summarySpan = containerEl.parentElement.querySelector('.selected-text');
-                if(!summarySpan) return;
+                if (!summarySpan) return;
                 const checked = Array.from(containerEl.querySelectorAll('input:checked'));
                 summarySpan.textContent = checked.length > 0 ? `${checked.length} selecionado(s)` : defaultText;
             };
 
             const bindCheckboxEvents = (containerEl, defaultText) => {
-                if(!containerEl) return;
+                if (!containerEl) return;
                 containerEl.querySelectorAll('input').forEach(cb => {
                     cb.addEventListener('change', () => updateSummary(containerEl, defaultText));
                 });
@@ -308,7 +308,7 @@ export function bindEvents() {
             };
 
             if (this.el.filterPalletId) {
-                const uniqueIds = [...new Set(allPallets.map(p => p.id).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
+                const uniqueIds = [...new Set(allPallets.map(p => p.id).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
                 this.el.filterPalletId.innerHTML = uniqueIds.map(id => {
                     const isChecked = Array.isArray(this.filters.palletId) && this.filters.palletId.includes(id.toString()) ? 'checked' : '';
                     return `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${id}" ${isChecked}> ${id}</label>`;
@@ -317,7 +317,7 @@ export function bindEvents() {
             }
 
             if (this.el.filterOp) {
-                const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a,b) => {
+                const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a, b) => {
                     const partsA = String(a).split('/');
                     const partsB = String(b).split('/');
                     const numA1 = parseInt(partsA[0]) || 0;
@@ -337,15 +337,15 @@ export function bindEvents() {
             if (this.el.filterItem) {
                 const uniqueItemsMap = new Map();
                 allPallets.forEach(p => {
-                    const iCode = p.itemCode || (this.productionOrders && this.productionOrders.find(o => `${o[0]}/${o[1]}`.replace(/\s+/g, '') === p.op.toString().replace(/\s+/g, ''))?.[2]) || '';
-                    const iMat = p.material || (this.productionOrders && this.productionOrders.find(o => `${o[0]}/${o[1]}`.replace(/\s+/g, '') === p.op.toString().replace(/\s+/g, ''))?.[3]) || '';
+                    const iCode = p.itemCode || '';
+                    const iMat = p.material || '';
                     if (iCode) {
                         uniqueItemsMap.set(iCode, iMat);
                     }
                 });
-                
+
                 let itemsHtml = '';
-                Array.from(uniqueItemsMap.keys()).sort((a,b) => {
+                Array.from(uniqueItemsMap.keys()).sort((a, b) => {
                     const nameA = uniqueItemsMap.get(a) || '';
                     const nameB = uniqueItemsMap.get(b) || '';
                     return String(nameA).localeCompare(String(nameB));
@@ -378,17 +378,17 @@ export function bindEvents() {
             if (this.el.filterPalletId) {
                 this.el.filterPalletId.querySelectorAll('input').forEach(cb => cb.checked = false);
                 const s = this.el.filterPalletId.parentElement.querySelector('.selected-text');
-                if(s) s.textContent = this._t('Todos os Pallets');
+                if (s) s.textContent = this._t('Todos os Pallets');
             }
             if (this.el.filterOp) {
                 this.el.filterOp.querySelectorAll('input').forEach(cb => cb.checked = false);
                 const s = this.el.filterOp.parentElement.querySelector('.selected-text');
-                if(s) s.textContent = this._t('Todas as OPs');
+                if (s) s.textContent = this._t('Todas as OPs');
             }
             if (this.el.filterItem) {
                 this.el.filterItem.querySelectorAll('input').forEach(cb => cb.checked = false);
                 const s = this.el.filterItem.parentElement.querySelector('.selected-text');
-                if(s) s.textContent = this._t('Todos os Itens');
+                if (s) s.textContent = this._t('Todos os Itens');
             }
             if (this.el.filterDateStart) this.el.filterDateStart.value = '';
             if (this.el.filterDateEnd) this.el.filterDateEnd.value = '';
@@ -585,23 +585,13 @@ export function renderDashboard() {
         // Determinar o status com base no peso total
         const totalWeight = p.totalWeight || 0;
         const statusLabel = totalWeight === 0 ? this._t('Novo') : this._t('Em andamento');
-        const statusBadgeStyle = totalWeight === 0 
-            ? 'background: rgba(14, 165, 233, 0.15) !important; color: var(--primary) !important; border: 1px solid rgba(14, 165, 233, 0.25) !important;' 
+        const statusBadgeStyle = totalWeight === 0
+            ? 'background: rgba(14, 165, 233, 0.15) !important; color: var(--primary) !important; border: 1px solid rgba(14, 165, 233, 0.25) !important;'
             : 'background: rgba(245, 158, 11, 0.15) !important; color: var(--warning) !important; border: 1px solid rgba(245, 158, 11, 0.25) !important;';
 
-        // Buscar o código do item associado à OP do pallet (robusto contra espaços)
-        const itemCode = p.itemCode || (this.productionOrders && this.productionOrders.find(o => {
-            const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
-            const opB = p.op.toString().replace(/\s+/g, '');
-            return opA === opB;
-        })?.[2]) || '';
-
-        // Buscar a descrição do item (material) associada à OP do pallet (robusto contra espaços)
-        const material = p.material || (this.productionOrders && this.productionOrders.find(o => {
-            const opA = `${o[0]}/${o[1]}`.replace(/\s+/g, '');
-            const opB = p.op.toString().replace(/\s+/g, '');
-            return opA === opB;
-        })?.[3]) || '';
+        // Usar diretamente o código e a descrição vindos da API
+        const itemCode = p.itemCode || '';
+        const material = p.material || '';
 
         // Formatação completa e resiliente de Data e Hora com dois dígitos garantidos
         let fullDateTimeStr = '---';
@@ -622,9 +612,9 @@ export function renderDashboard() {
             console.warn('Erro ao formatar data:', e);
         }
 
-        const prodDisplay = itemCode 
-            ? `${itemCode} | ${material || 'Sem descrição'}` 
-            : (material || 'Sem descrição');
+        const prodDisplay = itemCode
+            ? `${itemCode} | ${material || 'SEM DESCRIÇÃO'}`
+            : (material || 'SEM DESCRIÇÃO');
 
         return `
             <div class="pallet-card" onclick="openActivePallet('${p.id}')" style="display: flex; flex-direction: column; gap: 16px; padding: 24px !important; background: #ffffff !important; border-radius: 16px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02) !important; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #f1f5f9 !important; height: 100% !important; min-height: 100% !important;">
@@ -676,7 +666,7 @@ export function renderDashboard() {
                     <div style="margin: 0 !important; padding: 0 !important; min-width: 0 !important;">
                         <div style="font-size: 0.7rem !important; color: #64748b !important; font-weight: 700 !important; letter-spacing: 0.05em !important; margin-bottom: 2px !important;">PRODUTO</div>
                         <div style="font-size: 0.95rem !important; color: #0f172a !important; font-weight: 800 !important; line-height: 1.2 !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;">
-                            ${itemCode ? `<span style="color: #334155 !important; font-weight: 600 !important; margin-right: 4px !important;">${itemCode} |</span>` : ''}${material || 'Sem descrição'}
+                            ${itemCode ? `<span style="color: #334155 !important; font-weight: 600 !important; margin-right: 4px !important;">${itemCode} |</span>` : ''}${material || 'SEM DESCRIÇÃO'}
                         </div>
                     </div>
                 </div>
@@ -770,11 +760,11 @@ export function renderHistory() {
     if (this.historySortColumn) {
         const col = this.historySortColumn;
         const dir = this.historySortDirection === 'asc' ? 1 : -1;
-        
+
         closed = [...closed].sort((a, b) => {
             let valA = getColumnValue(a, col);
             let valB = getColumnValue(b, col);
-            
+
             if (col === 'id') {
                 const numA = parseInt(a.id) || 0;
                 const numB = parseInt(b.id) || 0;
@@ -795,7 +785,7 @@ export function renderHistory() {
                 const dateB = b.endTime ? new Date(b.endTime.toString().replace(' ', 'T')) : new Date(0);
                 return (dateA - dateB) * dir;
             }
-            
+
             return valA.localeCompare(valB) * dir;
         });
     } else {
@@ -822,7 +812,7 @@ export function renderHistory() {
         const opStr = p.op || '---';
         const boxesCount = p.boxes ? p.boxes.length : 0;
         const totalWeight = typeof p.totalWeight === 'number' ? p.totalWeight.toFixed(2) : '0.00';
-        
+
         let statusBadgeStyle = 'background: rgba(21, 128, 61, 0.12) !important; color: #15803d !important; border: 1px solid rgba(21, 128, 61, 0.3) !important;';
         let statusLabel = 'FINALIZADO';
 
@@ -864,7 +854,7 @@ export function openPalletDetails(id) {
 
     document.getElementById('modal-op').textContent = p.op;
     document.getElementById('modal-material').textContent = p.material;
-    
+
     let detailDateStr = '---';
     try {
         const rawDate = p.endTime || p.startTime;
@@ -875,7 +865,7 @@ export function openPalletDetails(id) {
                 detailDateStr = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
             }
         }
-    } catch(e) {}
+    } catch (e) { }
     document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
     document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
@@ -895,39 +885,39 @@ export function openPalletDetails(id) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ "U_SPS_PalletCode": p.id })
     })
-    .then(r => r.json())
-    .then(sapData => {
-        document.getElementById('bs-loading').classList.add('is-hidden');
-        if (sapData) {
-            if (sapData.U_SPS_Status) {
-                p.status = sapData.U_SPS_Status;
-                updateButtonsVisibility(p.status);
+        .then(r => r.json())
+        .then(sapData => {
+            document.getElementById('bs-loading').classList.add('is-hidden');
+            if (sapData) {
+                if (sapData.U_SPS_Status) {
+                    p.status = sapData.U_SPS_Status;
+                    updateButtonsVisibility(p.status);
+                }
+                if (sapData.SPS_PALLET_GROUP_LCollection) {
+                    p.boxes = sapData.SPS_PALLET_GROUP_LCollection
+                        .filter(l => l.U_SPS_Status !== 'REMOVIDO')
+                        .map(l => ({
+                            lineId: l.LineId,
+                            weight: parseFloat(l.U_SPS_BoxWeight || 0),
+                            time: l.U_SPS_CreateDate,
+                            status: l.U_SPS_Status || 'EMPESAGEM',
+                            timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
+                            createTime: l.U_SPS_CreateTime
+                        }));
+                    p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
+                    document.getElementById('modal-boxes').textContent = p.boxes.length;
+                    document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
+                }
             }
-            if (sapData.SPS_PALLET_GROUP_LCollection) {
-                p.boxes = sapData.SPS_PALLET_GROUP_LCollection
-                    .filter(l => l.U_SPS_Status !== 'REMOVIDO')
-                    .map(l => ({
-                        lineId: l.LineId,
-                        weight: parseFloat(l.U_SPS_BoxWeight || 0),
-                        time: l.U_SPS_CreateDate,
-                        status: l.U_SPS_Status || 'EMPESAGEM',
-                        timestamp: l.U_SPS_CreateDate || new Date().toISOString(),
-                        createTime: l.U_SPS_CreateTime
-                    }));
-                p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
-                document.getElementById('modal-boxes').textContent = p.boxes.length;
-                document.getElementById('modal-weight').textContent = `${p.totalWeight.toFixed(2)} kg`;
-            }
-        }
-        renderList();
-        this.el.palletModal.classList.add('is-active');
-    })
-    .catch(err => {
-        console.error('Erro ao buscar caixas do pallet:', err);
-        document.getElementById('bs-loading').classList.add('is-hidden');
-        renderList();
-        this.el.palletModal.classList.add('is-active');
-    });
+            renderList();
+            this.el.palletModal.classList.add('is-active');
+        })
+        .catch(err => {
+            console.error('Erro ao buscar caixas do pallet:', err);
+            document.getElementById('bs-loading').classList.add('is-hidden');
+            renderList();
+            this.el.palletModal.classList.add('is-active');
+        });
 }
 
 export function updateStats() {
@@ -962,21 +952,21 @@ export function showConfirm(msg, onConfirm) {
 
 function checkFilters(p, filters) {
     if (!filters) return true;
-    
+
     // 1. Pallet ID filter
     if (filters.palletId && Array.isArray(filters.palletId) && filters.palletId.length > 0) {
         if (!p.id || !filters.palletId.includes(p.id.toString())) {
             return false;
         }
     }
-    
+
     // 2. OP filter
     if (filters.op && Array.isArray(filters.op) && filters.op.length > 0) {
         if (!p.op || !filters.op.includes(p.op.toString())) {
             return false;
         }
     }
-    
+
     // 3. Item filter
     if (filters.item && Array.isArray(filters.item) && filters.item.length > 0) {
         const iCode = p.itemCode ? p.itemCode.toString() : '';
@@ -984,7 +974,7 @@ function checkFilters(p, filters) {
             return false;
         }
     }
-    
+
     // 4. Date range filter
     const rawDate = p.startTime || p.endTime;
     if (rawDate) {
@@ -993,26 +983,26 @@ function checkFilters(p, filters) {
             if (!isNaN(dateObj)) {
                 // Get timestamp for start of day
                 const dateVal = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
-                
+
                 if (filters.dateStart) {
                     const parts = filters.dateStart.split('-');
                     if (parts.length === 3) {
-                        const startVal = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])).getTime();
+                        const startVal = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])).getTime();
                         if (dateVal < startVal) return false;
                     }
                 }
-                
+
                 if (filters.dateEnd) {
                     const parts = filters.dateEnd.split('-');
                     if (parts.length === 3) {
-                        const endVal = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])).getTime();
+                        const endVal = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])).getTime();
                         if (dateVal > endVal) return false;
                     }
                 }
             }
-        } catch(e) {}
+        } catch (e) { }
     }
-    
+
     return true;
 }
 
@@ -1053,7 +1043,7 @@ export function handleHistorySort(columnId) {
 
 export function toggleHistoryFilterDropdown(event, columnId) {
     event.stopPropagation();
-    
+
     const dropdown = document.getElementById('excel-filter-dropdown');
     if (!dropdown) return;
 
@@ -1065,7 +1055,7 @@ export function toggleHistoryFilterDropdown(event, columnId) {
 
     this.activeFilterColumn = columnId;
     this.populateHistoryFilterDropdown(columnId);
-    
+
     dropdown.classList.remove('is-hidden');
 
     const rect = event.currentTarget.getBoundingClientRect();
@@ -1126,7 +1116,7 @@ export function populateHistoryFilterDropdown(columnId) {
 export function filterHistoryDropdownItems(columnId) {
     const searchVal = document.getElementById(`filter-search-${columnId}`).value.toLowerCase().trim();
     const listItems = document.querySelectorAll(`#filter-list-${columnId} .excel-filter-item:not(.select-all)`);
-    
+
     listItems.forEach(item => {
         const text = item.querySelector('span').textContent.toLowerCase();
         if (text.includes(searchVal)) {
@@ -1152,9 +1142,9 @@ export function selectAllHistoryFilter(columnId, checked) {
 export function applyHistoryFilter(columnId) {
     const listContainer = document.getElementById(`filter-list-${columnId}`);
     if (!listContainer) return;
-    
+
     const checkBoxes = listContainer.querySelectorAll('.excel-filter-item:not(.select-all) input[type="checkbox"]');
-    
+
     const checkedValues = new Set();
     checkBoxes.forEach(cb => {
         if (cb.checked) {
@@ -1163,12 +1153,12 @@ export function applyHistoryFilter(columnId) {
     });
 
     this.historyColumnFilters[columnId] = checkedValues;
-    
+
     const triggerBtn = document.querySelector(`th[ondblclick*="'${columnId}'"] .filter-trigger-btn`);
     if (triggerBtn) {
         const items = this.sapClosedPallets || [];
         const totalUniqueValuesCount = new Set(items.map(p => getColumnValue(p, columnId))).size;
-        
+
         if (checkedValues.size < totalUniqueValuesCount) {
             triggerBtn.classList.add('active');
             triggerBtn.style.color = 'var(--primary)';

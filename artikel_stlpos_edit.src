@@ -1,0 +1,6 @@
+﻿// DataWindow loaded
+// Created 28.05.2026 11:44:45 from jsilva, Station fsartorinew
+global function dw_1_load
+// Last change: 28.05.2026 11:44:52 from jsilva, Station fsartorinew
+dw_1.item.onlyreservation_t.formatstring=text=Apenas Reservas Registar,
+end global
