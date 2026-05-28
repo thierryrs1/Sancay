@@ -133,10 +133,18 @@ export function mapElements() {
 }
 
 export function bindEvents() {
-    // Fechar dropdowns de filtro do Excel ao clicar fora
-    document.addEventListener('click', () => {
+    // Fechar dropdowns ao clicar fora
+    document.addEventListener('click', (e) => {
+        // Dropdowns do Excel
         document.querySelectorAll('.excel-filter-dropdown').forEach(el => {
             el.classList.add('is-hidden');
+        });
+
+        // Dropdowns nativos de Filtros
+        document.querySelectorAll('details.custom-dropdown[open]').forEach(details => {
+            if (!details.contains(e.target)) {
+                details.removeAttribute('open');
+            }
         });
     });
 
@@ -987,15 +995,19 @@ function checkFilters(p, filters) {
                 const dateVal = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
                 
                 if (filters.dateStart) {
-                    const startLimit = new Date(filters.dateStart);
-                    const startVal = new Date(startLimit.getFullYear(), startLimit.getMonth(), startLimit.getDate()).getTime();
-                    if (dateVal < startVal) return false;
+                    const parts = filters.dateStart.split('-');
+                    if (parts.length === 3) {
+                        const startVal = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])).getTime();
+                        if (dateVal < startVal) return false;
+                    }
                 }
                 
                 if (filters.dateEnd) {
-                    const endLimit = new Date(filters.dateEnd);
-                    const endVal = new Date(endLimit.getFullYear(), endLimit.getMonth(), endLimit.getDate()).getTime();
-                    if (dateVal > endVal) return false;
+                    const parts = filters.dateEnd.split('-');
+                    if (parts.length === 3) {
+                        const endVal = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])).getTime();
+                        if (dateVal > endVal) return false;
+                    }
                 }
             }
         } catch(e) {}
