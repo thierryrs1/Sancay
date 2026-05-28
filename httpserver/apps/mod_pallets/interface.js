@@ -309,7 +309,16 @@ export function bindEvents() {
             }
 
             if (this.el.filterOp) {
-                const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
+                const uniqueOps = [...new Set(allPallets.map(p => p.op).filter(Boolean))].sort((a,b) => {
+                    const partsA = String(a).split('/');
+                    const partsB = String(b).split('/');
+                    const numA1 = parseInt(partsA[0]) || 0;
+                    const numA2 = parseInt(partsA[1]) || 0;
+                    const numB1 = parseInt(partsB[0]) || 0;
+                    const numB2 = parseInt(partsB[1]) || 0;
+                    if (numA1 !== numB1) return numA1 - numB1;
+                    return numA2 - numB2;
+                });
                 this.el.filterOp.innerHTML = uniqueOps.map(op => {
                     const isChecked = Array.isArray(this.filters.op) && this.filters.op.includes(op.toString()) ? 'checked' : '';
                     return `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${op}" ${isChecked}> ${op}</label>`;
@@ -328,7 +337,11 @@ export function bindEvents() {
                 });
                 
                 let itemsHtml = '';
-                Array.from(uniqueItemsMap.keys()).sort((a,b) => String(a).localeCompare(String(b))).forEach(code => {
+                Array.from(uniqueItemsMap.keys()).sort((a,b) => {
+                    const nameA = uniqueItemsMap.get(a) || '';
+                    const nameB = uniqueItemsMap.get(b) || '';
+                    return String(nameA).localeCompare(String(nameB));
+                }).forEach(code => {
                     const desc = uniqueItemsMap.get(code);
                     const isChecked = Array.isArray(this.filters.item) && this.filters.item.includes(code.toString()) ? 'checked' : '';
                     itemsHtml += `<label style="display:flex; align-items:center; gap:8px; padding:6px; cursor:pointer;"><input type="checkbox" value="${code}" ${isChecked}> ${code} | ${desc}</label>`;
