@@ -1532,3 +1532,89 @@ th.sancay-th .filter-trigger-btn.active {
 .active-pallets-grid.carousel-view::-webkit-scrollbar-thumb:hover {
     background: #94a3b8 !important;
 }
+
+/* ==========================================================================
+   TABLE ROW ACTIONS
+   ========================================================================== */
+.sancay-tr-hoverable {
+    border-bottom: 1px solid #e2e8f0 !important;
+    background: transparent !important;
+    transition: background 0.2s !important;
+}
+
+.sancay-tr-hoverable:hover {
+    background: #f8fafc !important;
+}
+
+.print-action-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #1d4ed8 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s !important;
+    margin-left: 16px !important;
+}
+
+.print-action-btn:hover {
+    background: #dbeafe !important;
+    transform: scale(1.05) !important;
+}
+
+.delete-action-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #ef4444 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+}
+
+.delete-action-btn:hover {
+    background: #fee2e2 !important;
+    transform: scale(1.05) !important;
+}
+
+.print-active-action-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #2563eb !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+}
+
+.print-active-action-btn:hover {
+    background: #dbeafe !important;
+    transform: scale(1.05) !important;
+}
+
+.weight-cell-flex {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+.boxes-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+}
+
+.print-action-btn:active, .print-active-action-btn:active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    transform: scale(0.95) !important;
+}

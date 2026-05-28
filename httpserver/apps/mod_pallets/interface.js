@@ -885,7 +885,6 @@ export function openPalletDetails(id) {
     } catch (e) { }
     document.getElementById('modal-date').textContent = detailDateStr;
     document.getElementById('modal-boxes').textContent = p.boxes.length;
-    document.getElementById('modal-boxes-badge').textContent = `${p.boxes.length} caixas`;
     document.getElementById('modal-weight').textContent = p.totalWeight.toFixed(2);
     
     // Configura o status badge inicial (se tiver status)
@@ -900,23 +899,25 @@ export function openPalletDetails(id) {
             const weightStr = typeof b.weight === 'number' ? `${b.weight.toFixed(2)} kg` : '---';
             
             const printHtml = b.lineId 
-                ? `<button class="print-box-btn" onclick="printBoxLabel('${p.docEntry}', '${b.lineId}')" style="background: none !important; border: none !important; color: #1d4ed8 !important; cursor: pointer !important; padding: 4px !important; transition: opacity 0.2s !important;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="${this._t('Imprimir Etiqueta da Caixa')}">
+                ? `<button class="print-action-btn" onclick="printBoxLabel('${p.docEntry}', '${b.lineId}')" style="margin-left: 0 !important;" title="${this._t('Imprimir Etiqueta da Caixa')}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                    </button>` 
                 : '';
 
-            return `<tr style="border-bottom: 1px solid #e2e8f0 !important; background: transparent !important; transition: background 0.2s !important;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                <td class="sancay-td" style="padding: 12px 16px !important; font-weight: 600 !important; color: #1e293b !important; font-size: 0.95rem !important;">${b.code || (i + 1)}</td>
-                <td class="sancay-td" style="padding: 12px 16px !important; color: #475569 !important; font-size: 0.95rem !important; text-align: center !important;">${timeStr}</td>
-                <td class="sancay-td" style="padding: 12px 16px !important; position: relative !important;">
-                    <div style="display:flex; align-items:center; justify-content: center;">
-                        <span style="font-size: 0.95rem !important; color: #475569 !important; font-weight: 500 !important;">${weightStr.replace(' kg', '')}</span>
+            return `<div class="box-card" style="border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 12px !important; background: #ffffff !important; display: flex !important; flex-direction: column !important; gap: 12px !important; min-height: 120px !important;">
+                <div style="font-size: 0.75rem !important; font-weight: 700 !important; color: #0f172a !important;">${b.code || (i + 1)}</div>
+                <div style="display: flex !important; align-items: flex-start !important; gap: 6px !important; color: #64748b !important; font-size: 0.7rem !important; line-height: 1.3 !important;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 2px !important; flex-shrink: 0 !important;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>${timeStr.replace(' ', '<br>')}</span>
+                </div>
+                <div style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; margin-top: auto !important;">
+                    <div style="display: flex !important; flex-direction: column !important; line-height: 1 !important;">
+                        <strong style="font-size: 1.1rem !important; font-weight: 700 !important; color: #0f172a !important;">${weightStr.replace(' kg', '')}</strong>
+                        <span style="font-size: 0.7rem !important; color: #64748b !important; margin-top: 4px !important;">kg</span>
                     </div>
-                    <div style="position: absolute !important; right: 16px !important; top: 50% !important; transform: translateY(-50%) !important; display: flex !important;">
-                        ${printHtml}
-                    </div>
-                </td>
-            </tr>`;
+                    ${printHtml}
+                </div>
+            </div>`;
         }).join('');
     };
 
@@ -949,7 +950,6 @@ export function openPalletDetails(id) {
                         }));
                     p.totalWeight = p.boxes.reduce((sum, box) => sum + box.weight, 0);
                     document.getElementById('modal-boxes').textContent = p.boxes.length;
-                    document.getElementById('modal-boxes-badge').textContent = `${p.boxes.length} caixas`;
                     document.getElementById('modal-weight').textContent = p.totalWeight.toFixed(2);
                     if (p.status) {
                         document.getElementById('modal-status-badge').textContent = p.status;

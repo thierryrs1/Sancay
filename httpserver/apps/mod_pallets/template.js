@@ -386,21 +386,7 @@ export function getPortalTemplate(t) {
                         </div>
 
                         <div class="boxes-table-container">
-                            <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 1rem !important;">
-                                <h4 style="margin: 0 !important; font-size: 1.1rem !important; color: #0f172a !important; font-weight: 600 !important;">Lista de Caixas</h4>
-                                <span id="modal-boxes-badge" style="background: #f1f5f9 !important; color: #475569 !important; padding: 6px 12px !important; border-radius: 6px !important; font-size: 0.8rem !important; font-weight: 500 !important; border: 1px solid #e2e8f0 !important;"></span>
-                            </div>
-                            <div style="background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; overflow: hidden !important;">
-                                <table style="width: 100% !important; border-collapse: collapse !important; margin: 0 !important;">
-                                    <thead style="background: #ffffff !important; border-bottom: 1px solid #e2e8f0 !important;">
-                                        <tr>
-                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: left !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">#</th>
-                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: center !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">Data/Hora</th>
-                                            <th class="sancay-th" style="padding: 12px 16px !important; text-align: center !important; font-size: 0.75rem !important; color: #64748b !important; font-weight: 500 !important;">Peso (kg)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modal-boxes-list"></tbody>
-                                </table>
+                            <div id="modal-boxes-list" class="boxes-grid" style="margin-top: 1rem !important;">
                             </div>
                         </div>
                     </div>
