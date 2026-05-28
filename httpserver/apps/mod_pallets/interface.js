@@ -808,7 +808,24 @@ export function renderHistory() {
         }
     });
     this.el.historyList.innerHTML = closed.map(p => {
-        const dateStr = p.displayTime && p.displayTime !== '---' ? p.displayTime : '---';
+        let dateStr = '---';
+        try {
+            if (p.startTime) {
+                const dateObj = new Date(p.startTime.toString().replace(' ', 'T'));
+                if (!isNaN(dateObj)) {
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const hh = String(dateObj.getHours()).padStart(2, '0');
+                    const mm = String(dateObj.getMinutes()).padStart(2, '0');
+                    dateStr = `${day}/${month}/${year} ${hh}:${mm}`;
+                } else if (typeof p.startTime === 'string' && p.startTime.length >= 16) {
+                    dateStr = p.startTime.substring(0, 16).replace('T', ' ');
+                } else {
+                    dateStr = p.startTime;
+                }
+            }
+        } catch(e) {}
         const opStr = p.op || '---';
         const boxesCount = p.boxes ? p.boxes.length : 0;
         const totalWeight = typeof p.totalWeight === 'number' ? p.totalWeight.toFixed(2) : '0.00';

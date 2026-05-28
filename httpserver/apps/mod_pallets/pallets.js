@@ -221,13 +221,18 @@ export function updateProcessView() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                </button>`;
 
+        const printHtml = `<button class="print-box-btn" onclick="printBoxLabel('${this.currentPallet.docEntry}', '${box.lineId || actualIndex + 1}')" style="background: none !important; border: none !important; color: #3b82f6 !important; cursor: pointer !important; padding: 4px !important; display: flex !important; align-items: center !important; justify-content: center; transition: color 0.2s !important;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#3b82f6'" title="${this._t('Imprimir Etiqueta da Caixa')}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+               </button>`;
+
         return `<li style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 16px !important; background: #ffffff !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; margin-bottom: 8px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;">
             <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
                 <span style="font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${box.code || `${this._t('Caixa')} #${actualIndex + 1}`}</span>
                 <span class="badge" style="${badgeStyle} font-size: 0.7rem !important; padding: 2px 8px !important; border-radius: 12px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.03em !important;">${this._t(statusLabel)}</span>
             </div>
-            <div style="display: flex !important; align-items: center !important; gap: 16px !important;">
-                <span class="box-weight" style="font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${box.weight.toFixed(2)} kg</span>
+            <div style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                <span class="box-weight" style="font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important; margin-right: 8px !important;">${box.weight.toFixed(2)} kg</span>
+                ${printHtml}
                 ${actionHtml}
             </div>
         </li>`;
@@ -295,23 +300,7 @@ export async function registerBox() {
             tare = 0; // Se não tiver nada conectado, nem manual
         }
 
-        let distNumber = this.currentPallet.op;
-        try {
-            const opBelnr = Number(this.currentPallet.op.split('/')[0]);
-            const batchRes = await fetch('http://192.168.30.14:9908/api/v1/getOrderBatch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ U_SPS_BELNR_ID: opBelnr })
-            });
-            if (batchRes.ok) {
-                const batchData = await batchRes.json();
-                if (batchData && batchData.DistNumber) {
-                    distNumber = batchData.DistNumber;
-                }
-            }
-        } catch (e) {
-            console.warn('Erro ao buscar DistNumber da OP:', e);
-        }
+        let distNumber = this.currentPallet.distNumber || this.currentPallet.op;
 
         const updatePayload = {
             "DocEntry": this.currentPallet.docEntry,
@@ -372,7 +361,12 @@ export async function registerBox() {
             lineId = this.currentPallet.boxes.length;
         }
 
-        // Aciona impressão da caixa
+        // Armazena o lineId na caixa local para que possa ser usado pelo botão de impressão manual
+        if (this.currentPallet.boxes.length > 0) {
+            this.currentPallet.boxes[this.currentPallet.boxes.length - 1].lineId = lineId;
+        }
+
+        // Aciona impressão automática da caixa
         this.printBoxLabel(this.currentPallet.docEntry, lineId);
     } catch (err) {
         console.error('Erro ao sincronizar caixa com SAP:', err);
@@ -745,82 +739,34 @@ export function fetchClosedPallets() {
     // para maximizar o desempenho e reaproveitar a API getWorkorderPallets.
 }
 
-export function printBoxLabel(docEntry, lineId) {
+export async function printBoxLabel(docEntry, lineId) {
     if (!this.userSettings || !this.userSettings.printer) {
         this.showToast(this._t('Atenção: Configure a impressora na aba Configurações primeiro!'));
         return;
     }
 
-    const lang = this.userSettings.language || 'PTB';
-    const params = `@${docEntry}@@${lineId}@@${lang}@`;
+    const payload = {
+        palletDocEntry: parseInt(docEntry),
+        boxLineId: parseInt(lineId),
+        printerCode: this.userSettings.printer,
+        labelCode: "caixaProducao",
+        lang: this.userSettings.language || "PTB"
+    };
 
-    getData('getAux', 'getEtiquetaCaixa', params, async (err, res) => {
-        if (err) {
-            console.error('Erro ao buscar dados da etiqueta da caixa no SAP:', err);
-            return;
+    try {
+        const response = await fetch('http://192.168.30.14:9908/api/v1/printBoxLabel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro API: ${response.status}`);
         }
 
-        if (!res || !res.value || !res.value[0]) {
-            console.error('Retorno inválido do SAP para caixa:', res);
-            return;
-        }
-
-        const rawRow = res.value[0];
-
-        const formattedLabel = {
-            ItemCode: rawRow[0] || '',
-            ItemName: rawRow[1] || '',
-            BarCode: rawRow[2] || '',
-            BatchValue: rawRow[3] || '',
-            BPLName: rawRow[4] || '',
-            BPLAdress1: rawRow[5] || '',
-            BPLAdress2: rawRow[6] || '',
-            BPLInfo: rawRow[7] || '',
-            LogoZPL: rawRow[8] || '',
-            QuantityValue: rawRow[9] || '',
-            TraceabilityValue: rawRow[10] || '',
-            QrCode: rawRow[11] || '',
-            MnfDateValue: rawRow[12] || '',
-            ExpDateValue: rawRow[13] || '',
-            GrossWeightValue: rawRow[14] || '',
-            NetWeightValue: rawRow[15] || '',
-            GrossWeightText: rawRow[16] || '',
-            NetWeightText: rawRow[17] || '',
-            QuantityText: rawRow[18] || '',
-            MnfDateText: rawRow[19] || '',
-            ExpDateText: rawRow[20] || '',
-            TraceabilityText: rawRow[21] || '',
-            BatchText: rawRow[22] || '',
-            InternalControl1: rawRow[23] || '',
-            InternalControl2: rawRow[24] || '',
-            ProducedBy: rawRow[25] || ''
-        };
-
-        const printPayload = {
-            printerCode: this.userSettings.printer,
-            labelCode: "caixaProducao",
-            labelData: [formattedLabel]
-        };
-
-        try {
-            const token = "U2FsdGVkX19Gz7grIE7ieIrDDcycyVrv4q6BdEq2Ep4hKfnb5WQ6haI+KNVo4l8KX9YRrkDHUgkMRbJhirVYMA==";
-            const response = await fetch('http://190.128.212.242:9906/print/labels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(printPayload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro API: ${response.status}`);
-            }
-
-            this.showToast(this._t('Etiqueta de caixa enviada para impressão!'));
-        } catch (printErr) {
-            console.error('Erro ao imprimir etiqueta de caixa:', printErr);
-            this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
-        }
-    });
+        this.showToast(this._t('Etiqueta enviada para impressão!'));
+    } catch (err) {
+        console.error('Erro ao imprimir etiqueta:', err);
+        this.showToast(this._t('Erro ao conectar com servidor de impressão.'));
+    }
 }

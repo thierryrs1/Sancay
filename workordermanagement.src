@@ -1,4 +1,5 @@
 ﻿function GetBatchNumber 
-	setvar=e_DistNumber=<e_DocEntry>/<e_LineNumber>
+	select charge_id into lote from beas_ftpos where belnr_id = <e_DocEntry> and belpos_id = <e_LineNumber>
+	setvar=e_DistNumber=<lote>
 	return true
 end function

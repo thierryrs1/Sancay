@@ -49,7 +49,8 @@ export function simulateWeight() {
 }
 
 export async function readScaleWeight() {
-    if (this.isScaleConnected && this.currentView === 'process-view' && !this.scaleLocked) {
+    // Continua checando mesmo se isScaleConnected for false
+    if (this.currentView === 'process-view' && !this.scaleLocked) {
         
         if (!this.userSettings || !this.userSettings.scale) {
             console.warn("Balança não configurada no usuário.");
@@ -67,31 +68,71 @@ export async function readScaleWeight() {
                 const data = await response.json();
                 
                 if (data.success && data.weightKilogram !== undefined && this.el.liveWeightDisplay) {
+                    // SE ESTAVA OFFLINE OU MANUAL, AUTO-RECUPERA!
+                    if (!this.isScaleConnected) {
+                        this.isScaleConnected = true;
+                        this.scaleManualMode = false;
+
+                        if (this.el.scaleStatusDot) this.el.scaleStatusDot.className = 'status-dot online';
+                        if (this.el.scaleStatusText) this.el.scaleStatusText.textContent = this._t('Balança Conectada');
+                        if (this.el.liveWeightDisplay) this.el.liveWeightDisplay.style.display = 'block';
+                        if (this.el.manualWeightInput) this.el.manualWeightInput.style.display = 'none';
+                        if (this.el.simulateWeightBtn) this.el.simulateWeightBtn.style.display = 'inline-block';
+                        if (this.el.scaleLabel) this.el.scaleLabel.textContent = this._t('PESO ATUAL');
+                        if (this.el.weightValueContainer) this.el.weightValueContainer.classList.remove('disconnected');
+                        
+                        const btn = document.getElementById('register-box-btn');
+                        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+                        
+                        this.showToast(this._t('Conexão da balança restabelecida automaticamente!'));
+                    }
+
                     this.currentGrossWeight = parseFloat(data.weightKilogram);
                     const tare = this.scaleTare || 0;
                     const netWeight = Math.max(0, this.currentGrossWeight - tare);
                     
                     this.el.liveWeightDisplay.textContent = netWeight.toFixed(3);
                 } else if (data.success === false) {
-                    this.isScaleConnected = false;
-                    this.scaleManualMode = false; // Força bloqueio total
-
+                    // SE ACABOU DE PERDER A CONEXÃO
+                    if (this.isScaleConnected) {
+                        this.isScaleConnected = false;
+                        
+                        // Bloqueia apenas se o usuário ainda não ativou o modo manual por senha
+                        if (!this.scaleManualMode) {
+                            if (this.el.scaleStatusDot) this.el.scaleStatusDot.className = 'status-dot offline';
+                            if (this.el.scaleStatusText) this.el.scaleStatusText.textContent = this._t('Balança Offline (Bloqueada)');
+                            if (this.el.liveWeightDisplay) this.el.liveWeightDisplay.style.display = 'none';
+                            if (this.el.manualWeightInput) this.el.manualWeightInput.style.display = 'none';
+                            if (this.el.simulateWeightBtn) this.el.simulateWeightBtn.style.display = 'none';
+                            if (this.el.scaleLabel) this.el.scaleLabel.textContent = this._t('INACESSÍVEL - REQUER SENHA');
+                            if (this.el.weightValueContainer) this.el.weightValueContainer.classList.add('disconnected');
+                            
+                            const btn = document.getElementById('register-box-btn');
+                            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
+                            
+                            this.showToast(this._t('Conexão perdida. Clique no status e autentique para digitar manual.'));
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Erro ao ler peso da balança API:", err);
+            // Erro de rede. Se estava conectada, marca como offline.
+            if (this.isScaleConnected) {
+                this.isScaleConnected = false;
+                if (!this.scaleManualMode) {
                     if (this.el.scaleStatusDot) this.el.scaleStatusDot.className = 'status-dot offline';
                     if (this.el.scaleStatusText) this.el.scaleStatusText.textContent = this._t('Balança Offline (Bloqueada)');
                     if (this.el.liveWeightDisplay) this.el.liveWeightDisplay.style.display = 'none';
-                    if (this.el.manualWeightInput) this.el.manualWeightInput.style.display = 'none'; // Esconde input manual
+                    if (this.el.manualWeightInput) this.el.manualWeightInput.style.display = 'none';
                     if (this.el.simulateWeightBtn) this.el.simulateWeightBtn.style.display = 'none';
                     if (this.el.scaleLabel) this.el.scaleLabel.textContent = this._t('INACESSÍVEL - REQUER SENHA');
                     if (this.el.weightValueContainer) this.el.weightValueContainer.classList.add('disconnected');
                     
                     const btn = document.getElementById('register-box-btn');
                     if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
-                    
-                    this.showToast(this._t('Conexão perdida. Clique no status e autentique para digitar manual.'));
                 }
             }
-        } catch (err) {
-            console.error("Erro ao ler peso da balança API:", err);
         }
     }
 }
