@@ -144,6 +144,38 @@ export function bindEvents() {
         this.el.toggleSidebarBtn.addEventListener('click', () => this.toggleSidebar());
     }
 
+    const toggleLayoutBtn = document.getElementById('toggle-layout-btn');
+    if (toggleLayoutBtn) {
+        toggleLayoutBtn.addEventListener('click', () => {
+            const grid = document.getElementById('active-pallets-list');
+            const iconGrid = document.getElementById('layout-icon-grid');
+            const iconCarousel = document.getElementById('layout-icon-carousel');
+            if (grid && grid.classList.contains('carousel-view')) {
+                grid.classList.remove('carousel-view');
+                iconGrid.style.setProperty('display', 'none', 'important');
+                iconCarousel.style.setProperty('display', 'block', 'important');
+                localStorage.setItem('sancay_dashboard_layout', 'grid');
+            } else if (grid) {
+                grid.classList.add('carousel-view');
+                iconCarousel.style.setProperty('display', 'none', 'important');
+                iconGrid.style.setProperty('display', 'block', 'important');
+                localStorage.setItem('sancay_dashboard_layout', 'carousel');
+            }
+        });
+
+        // Initialize from saved preference
+        if (localStorage.getItem('sancay_dashboard_layout') === 'carousel') {
+            const grid = document.getElementById('active-pallets-list');
+            const iconGrid = document.getElementById('layout-icon-grid');
+            const iconCarousel = document.getElementById('layout-icon-carousel');
+            if (grid && iconGrid && iconCarousel) {
+                grid.classList.add('carousel-view');
+                iconCarousel.style.setProperty('display', 'none', 'important');
+                iconGrid.style.setProperty('display', 'block', 'important');
+            }
+        }
+    }
+
     this.el.navLinks.forEach(link => {
         link.addEventListener('click', () => this.switchView(link.getAttribute('data-view')));
     });

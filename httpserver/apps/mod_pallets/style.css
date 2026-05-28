@@ -199,6 +199,7 @@ button {
     padding: 2.5rem !important;
     max-width: 100% !important;
     width: 100% !important;
+    min-width: 0 !important;
     transition: margin-left 0.3s ease !important;
 }
 
@@ -1493,4 +1494,41 @@ th.sancay-th {
 
 th.sancay-th .filter-trigger-btn.active {
     color: var(--primary) !important;
+}
+
+/* ==========================================================================
+   CAROUSEL VIEW STYLES
+   ========================================================================== */
+.active-pallets-grid.carousel-view {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding-bottom: 1rem !important; /* Spacing for scrollbar */
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.active-pallets-grid.carousel-view .pallet-card {
+    min-width: 420px !important;
+    scroll-snap-align: start !important;
+    flex-shrink: 0 !important;
+}
+
+/* Custom scrollbar for carousel */
+.active-pallets-grid.carousel-view::-webkit-scrollbar {
+    height: 8px !important;
+}
+
+.active-pallets-grid.carousel-view::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 4px !important;
+}
+
+.active-pallets-grid.carousel-view::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+    border-radius: 4px !important;
+}
+
+.active-pallets-grid.carousel-view::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8 !important;
 }
