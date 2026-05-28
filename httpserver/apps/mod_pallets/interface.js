@@ -641,9 +641,9 @@ export function renderDashboard() {
                         </div>
                         <div style="margin: 0 !important; padding: 0 !important;">
                             <div style="font-size: 0.7rem !important; color: #64748b !important; font-weight: 700 !important; letter-spacing: 0.05em !important; margin-bottom: 2px !important;">CAIXAS</div>
-                            <div style="display: flex !important; align-items: baseline !important; gap: 4px !important; margin: 0 !important; padding: 0 !important;">
+                            <div style="display: flex !important; align-items: baseline !important; gap: 4px !important; margin: 0 !important; padding: 0 !important; flex-wrap: nowrap !important;">
                                 <div style="font-size: 1.8rem !important; color: #0f172a !important; font-weight: 800 !important; line-height: 1 !important;">${p.boxes ? p.boxes.length : 0}</div>
-                                <div style="font-size: 0.9rem !important; color: #64748b !important; font-weight: 600 !important;">/ ${p.expectedQty > 0 ? p.expectedQty : '-'} CX</div>
+                                <div style="font-size: 0.9rem !important; color: #64748b !important; font-weight: 600 !important; white-space: nowrap !important;">/ ${p.expectedQty > 0 ? p.expectedQty : '-'} CX</div>
                             </div>
                         </div>
                     </div>

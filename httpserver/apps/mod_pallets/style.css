@@ -197,7 +197,7 @@ button {
     margin-left: 260px !important;
     /* Matches sidebar width */
     padding: 2.5rem !important;
-    max-width: 1400px !important;
+    max-width: 100% !important;
     width: 100% !important;
     transition: margin-left 0.3s ease !important;
 }
@@ -547,7 +547,7 @@ tr:hover td {
 /* Active Pallets Grid */
 .active-pallets-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)) !important;
     gap: 1.5rem !important;
 }
 
