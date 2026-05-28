@@ -223,7 +223,7 @@ export function updateProcessView() {
 
         return `<li style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 12px 16px !important; background: #ffffff !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; margin-bottom: 8px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;">
             <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
-                <span style="font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${this._t('Caixa')} #${actualIndex + 1}</span>
+                <span style="font-weight: 700 !important; color: var(--text-strong) !important; font-size: 0.95rem !important;">${box.code || `${this._t('Caixa')} #${actualIndex + 1}`}</span>
                 <span class="badge" style="${badgeStyle} font-size: 0.7rem !important; padding: 2px 8px !important; border-radius: 12px !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.03em !important;">${this._t(statusLabel)}</span>
             </div>
             <div style="display: flex !important; align-items: center !important; gap: 16px !important;">
